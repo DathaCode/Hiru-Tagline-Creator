@@ -1,225 +1,290 @@
 """
 Text renderer for Hiru News Tagline Creator.
-Uses Iskoola Pota Bold (iskpotab.ttf) - Unicode Sinhala, built into Windows.
-FM GANGANEE / FM SANDHYANEE labels in the UI are editorial reference only.
+Uses FM Ganganee (Topic Bed) and FM Sandhyanee (Tag/White Beds) via PyQt5.
+Unicode text is converted to FM ASCII via convert_unicode_to_fm() before rendering.
+English letters are detected and rendered with Arial to avoid FM glyph corruption.
 
-Font sizes as specified:
-  Topic Bed:  50.4px (starts at 50.4, auto-shrinks only if text too wide)
-  TAG Bed:    60px   (starts at 60, horizontal squeeze via h_scale applied first)
-  White Bed:  48px   (starts at 48, auto-shrinks only if text too wide)
+Font sizes:
+  Topic Bed:  50.4px
+  TAG Bed:    60px
+  White Bed:  48px
+
+Text scaling:
+  - Short text renders at natural size (scale = 1.0), no stretching
+  - Long text is compressed horizontally only (height unchanged)
+  - Minimum floor: 0.5 (50% horizontal compression)
+  - User's manual H-Scale slider overrides auto-fit when != 100
 """
 import os
 import sys
 from PIL import Image
 
 try:
-    from PyQt5.QtGui import QGuiApplication, QImage, QPainter, QFont, QColor, QFontMetrics
+    from PyQt5.QtGui import QGuiApplication, QImage, QPainter, QFont, QColor, QFontMetrics, QFontDatabase
     from PyQt5.QtCore import Qt, QRect
 except ImportError:
     print("PyQt5 is required for proper Sinhala text rendering. Please install it.")
     sys.exit(1)
 
-# Ensure QGuiApplication exists to use QFont and QPainter safely
+from utils.fm_converter import convert_unicode_to_fm, has_english_segments, split_fm_and_english
+from utils.font_finder import find_fm_fonts
+
+# Ensure QGuiApplication exists
 _qapp = QGuiApplication.instance()
 if not _qapp:
     _qapp = QGuiApplication(sys.argv)
+
+# English/fallback font for Latin letters mixed into FM text
+ENGLISH_FONT_NAME = 'Arial'
+
 
 class TextRenderer:
     def __init__(self, settings, template_mgr=None):
         self.settings = settings
         self.template_mgr = template_mgr
-        
-        windir = os.environ.get('WINDIR', r'C:\Windows')
-        font_dir = os.path.join(windir, 'Fonts')
 
-        self.FONT_NAME = 'Iskoola Pota'
-        self.FONT_BOLD = os.path.join(font_dir, 'iskpotab.ttf')
-        self.FONT_NORMAL = os.path.join(font_dir, 'iskpota.ttf')
+        fm_paths = find_fm_fonts()
+
+        self.TOPIC_FONT = None
+        self.TAG_FONT = None
+        self.WHITE_FONT = None
+
+        ganganee_path = fm_paths.get('FM GANGANEE')
+        sandhyanee_path = fm_paths.get('FM SANDHYANEE')
 
         print("\n" + "=" * 70)
-        print("UNICODE FONT VERIFICATION (PyQt5 Engine):")
-        print(f"  Iskoola Pota Bold:   {'OK' if os.path.exists(self.FONT_BOLD)   else 'MISSING'}")
-        print(f"  Iskoola Pota Normal: {'OK' if os.path.exists(self.FONT_NORMAL) else 'MISSING'}")
+        print("FM FONT VERIFICATION (PyQt5 Engine):")
+
+        if ganganee_path and os.path.exists(ganganee_path):
+            font_id = QFontDatabase.addApplicationFont(ganganee_path)
+            if font_id != -1:
+                families = QFontDatabase.applicationFontFamilies(font_id)
+                if families:
+                    self.TOPIC_FONT = families[0]
+                    print(f"  ✓ FM GANGANEE loaded: '{self.TOPIC_FONT}' from {ganganee_path}")
+
+        if sandhyanee_path and os.path.exists(sandhyanee_path):
+            font_id = QFontDatabase.addApplicationFont(sandhyanee_path)
+            if font_id != -1:
+                families = QFontDatabase.applicationFontFamilies(font_id)
+                if families:
+                    self.TAG_FONT = families[0]
+                    self.WHITE_FONT = families[0]
+                    print(f"  ✓ FM SANDHYANEE loaded: '{self.TAG_FONT}' from {sandhyanee_path}")
+
+        if not self.TOPIC_FONT:
+            self.TOPIC_FONT = 'Arial'
+            print("  ⚠️ TOPIC_FONT falling back to Arial")
+        if not self.TAG_FONT:
+            self.TAG_FONT = 'Arial'
+        if not self.WHITE_FONT:
+            self.WHITE_FONT = 'Arial'
+
         print("=" * 70 + "\n")
 
-    def _get_qfont(self, size, letter_spacing=0):
-        """Create a QFont with given pixel size, always bold, and optional letter spacing."""
-        font = QFont(self.FONT_NAME)
+    def _get_qfont(self, font_name, size, letter_spacing=0, bold=False):
+        """Create a QFont — bold is NOT forced (beds control via settings)."""
+        font = QFont(font_name)
         font.setPixelSize(int(round(float(size))))
-        # Always bold for all beds
-        font.setBold(True)
-        # Apply letter spacing (absolute pixel spacing between characters)
+        if bold:
+            font.setBold(True)
         if letter_spacing != 0:
             font.setLetterSpacing(QFont.AbsoluteSpacing, float(letter_spacing))
         return font
 
-    def _measure(self, text, font_size, letter_spacing=0):
-        font = self._get_qfont(font_size, letter_spacing)
+    def _measure_width(self, text, font):
+        """Measure text width using QFontMetrics.horizontalAdvance."""
         fm = QFontMetrics(font)
-        rect = fm.boundingRect(text)
-        return rect.width(), fm.height()
+        return fm.horizontalAdvance(text)
 
-    def calculate_best_fit_size(self, text, max_width, base_size, min_size=24, letter_spacing=0):
-        """Search for optimal font size that fits text within max_width."""
-        font_size = base_size
-        while font_size >= min_size:
-            w, h = self._measure(text, font_size, letter_spacing)
-            if w <= (max_width - 40):
-                print(f"    Best fit: {font_size}pt (width: {w}px, max: {max_width}px)")
-                return font_size, w, h
-            font_size -= 1
-            
-        print(f"    ⚠️ Text too long even at {min_size}pt!")
-        w, h = self._measure(text, min_size, letter_spacing)
-        return min_size, w, h
+    def _measure_segments_width(self, segments, fm_font, eng_font):
+        """Measure total width of mixed FM/English segments."""
+        total = 0
+        for seg_text, is_fm in segments:
+            font = fm_font if is_fm else eng_font
+            total += self._measure_width(seg_text, font)
+        return total
+
+    def _compute_fit_scale(self, width, available_width):
+        """Scale factor: 1.0 if fits, else compress down to min 0.5."""
+        if width <= available_width:
+            return 1.0
+        return max(available_width / width, 0.5)
 
     def _qimage_to_pil(self, qimage):
-        """Convert QImage to PIL Image safely using buffer mapping"""
+        """Convert QImage to PIL Image safely."""
         qimage = qimage.convertToFormat(QImage.Format_ARGB32)
         buffer = qimage.bits().asstring(qimage.sizeInBytes())
         return Image.frombuffer("RGBA", (qimage.width(), qimage.height()), buffer, "raw", "BGRA", 0, 1)
 
-    def _render_squeezed_text(self, img_bg, text, font_size, tx, ty, tw, th, color, h_scale, letter_spacing=0):
-        # Draw perfectly vertically centered text in full bed height 'th'
-        # with extra height and width to avoid ligature/descender cutoffs
-        qimg = QImage(tw + 80, th + 60, QImage.Format_ARGB32)
-        qimg.fill(QColor(0, 0, 0, 0))
-        
-        painter = QPainter(qimg)
-        painter.setRenderHints(QPainter.Antialiasing | QPainter.TextAntialiasing)
-        painter.setFont(self._get_qfont(font_size, letter_spacing))
+    def _draw_segments(self, painter, segments, fm_font, eng_font, x, y, h, scale, color):
+        """Draw mixed FM/English text segments with appropriate fonts."""
         painter.setPen(QColor(color))
-        
-        rect = QRect(40, 30, tw, th)
-        painter.drawText(rect, Qt.AlignLeft | Qt.AlignVCenter | Qt.TextDontClip, text)
-        painter.end()
-        
-        temp_img = self._qimage_to_pil(qimg)
-        
-        if h_scale >= 100:
-            img_bg.paste(temp_img, (max(0, tx - 40), max(0, ty - 30)), temp_img)
-        else:
-            new_w = max(1, int(temp_img.width * h_scale / 100))
-            try:
-                rs = Image.Resampling.LANCZOS
-            except AttributeError:
-                rs = Image.LANCZOS
-            squeezed = temp_img.resize((new_w, temp_img.height), rs)
-            img_bg.paste(squeezed, (max(0, tx - 40), max(0, ty - 30)), squeezed)
+        painter.save()
+        painter.translate(x, y)
+        if scale < 1.0:
+            painter.scale(scale, 1.0)
+
+        cursor_x = 0
+        for seg_text, is_fm in segments:
+            font = fm_font if is_fm else eng_font
+            painter.setFont(font)
+            text_rect = QRect(cursor_x, -h // 2, 5000, h)
+            painter.drawText(text_rect, Qt.AlignLeft | Qt.AlignVCenter | Qt.TextDontClip, seg_text)
+            cursor_x += QFontMetrics(font).horizontalAdvance(seg_text)
+
+        painter.restore()
 
     def render_topic_bed(self, text, bed_config, letter_spacing=0):
-        """
-        Render Topic Bed with proper Unicode and left alignment using PyQt5 Engine
-        """
+        """Render Topic Bed using FM GANGANEE font. Ignored letter_spacing per user request."""
+        # Force letter_spacing to 0 for Topic bed
+        letter_spacing = 0
         text = str(text)
+        fm_text = convert_unicode_to_fm(text)
+        font_name = self.TOPIC_FONT
+        font_size = 50.4
+
         x = bed_config['x']
         y = bed_config['y']
         h = bed_config['height']
-        
-        font_size = 50.4
-        text_width, text_height = self._measure(text, font_size, letter_spacing)
-        
+
+        fm_font = self._get_qfont(font_name, font_size, letter_spacing)
+        eng_font = self._get_qfont(ENGLISH_FONT_NAME, font_size, letter_spacing, bold=True)
+
+        # Split into FM/English segments
+        if has_english_segments(fm_text):
+            segments = split_fm_and_english(fm_text)
+        else:
+            segments = [(fm_text, True)]
+
+        text_width = self._measure_segments_width(segments, fm_font, eng_font)
+
+        # Background width
         bg_width = text_width + 80
         bg_width = max(bg_width, bed_config.get('width_min', 370))
         bg_width = min(bg_width, bed_config.get('width_max', 1110))
-        
+
+        available_width = bg_width - 40
+        scale = self._compute_fit_scale(text_width, available_width)
+
         qimg = QImage(1920, 1080, QImage.Format_ARGB32)
         qimg.fill(QColor(0, 0, 0, 0))
-        
+
         painter = QPainter(qimg)
         painter.setRenderHints(QPainter.Antialiasing | QPainter.TextAntialiasing)
-        
+
         # Red background
         bg_color = QColor(bed_config.get('bg_color', '#a70003'))
         painter.fillRect(x, y, bg_width, h, bg_color)
-        
-        # Draw text — shift up by 5px from center for visual correction
-        painter.setFont(self._get_qfont(font_size, letter_spacing))
-        tc = QColor(bed_config.get('text_color', '#FFFFFF'))
-        painter.setPen(tc)
-        
-        text_x = x + 20
-        rect = QRect(text_x, y - 5, bg_width - 20, h)
-        painter.drawText(rect, Qt.AlignLeft | Qt.AlignVCenter | Qt.TextDontClip, text)
+
+        # Draw text — shifted slightly right (+30) and vertically centered
+        text_x = x + 30
+        text_y = y + (h // 2)
+
+        self._draw_segments(painter, segments, fm_font, eng_font,
+                            text_x, text_y, h, scale,
+                            bed_config.get('text_color', '#FFFFFF'))
         painter.end()
-        
-        print(f"  Topic: size={font_size}pt, bg={bg_width}px, pos=({text_x},{y})")
+
+        print(f"  Topic: size={font_size}pt, bg={bg_width}px, scale={scale:.2f}, font={font_name}")
         return self._qimage_to_pil(qimg)
 
     def render_tag_bed_text(self, text, bed_config, h_scale=100, letter_spacing=0):
-        """
-        Render TAG Bed with proper Unicode and left alignment
-        """
+        """Render TAG Bed using FM SANDHYANEE font."""
         text = str(text)
+        fm_text = convert_unicode_to_fm(text)
+        font_name = self.TAG_FONT
+        font_size = 60
+
         x = bed_config['x']
         y = bed_config['y']
         w = bed_config['width']
         h = bed_config['height']
-        
-        target_width = w - 40
-        available_width = target_width if h_scale >= 100 else int(target_width * 100 / max(1, h_scale))
-        
-        font_size, text_width, text_height = self.calculate_best_fit_size(text, available_width, 60, min_size=30, letter_spacing=letter_spacing)
-        
-        text_x = x + 20
-        img = Image.new('RGBA', (1920, 1080), (0, 0, 0, 0))
-        
-        if h_scale < 100:
-            # Shift Y axis +10 down to visually align text better
-            self._render_squeezed_text(img, text, font_size, text_x, y + 10, text_width, h, bed_config.get('text_color', '#000000'), h_scale, letter_spacing)
+
+        fm_font = self._get_qfont(font_name, font_size, letter_spacing)
+        eng_font = self._get_qfont(ENGLISH_FONT_NAME, font_size, letter_spacing, bold=True)
+
+        if has_english_segments(fm_text):
+            segments = split_fm_and_english(fm_text)
         else:
-            qimg = QImage(1920, 1080, QImage.Format_ARGB32)
-            qimg.fill(QColor(0,0,0,0))
-            painter = QPainter(qimg)
-            painter.setRenderHints(QPainter.Antialiasing | QPainter.TextAntialiasing)
-            painter.setFont(self._get_qfont(font_size, letter_spacing))
-            painter.setPen(QColor(bed_config.get('text_color', '#000000')))
-            # Shift Y axis +10 down
-            rect = QRect(text_x, y + 10, w - 20, h)
-            painter.drawText(rect, Qt.AlignLeft | Qt.AlignVCenter | Qt.TextDontClip, text)
-            painter.end()
-            img = self._qimage_to_pil(qimg)
-            
-        print(f"  TAG: size={font_size}pt, width={text_width}px/{target_width}px, pos=({text_x},{y})")
+            segments = [(fm_text, True)]
+
+        text_width = self._measure_segments_width(segments, fm_font, eng_font)
+        available_width = w - 40
+
+        if h_scale < 100:
+            scale = h_scale / 100.0
+        else:
+            scale = self._compute_fit_scale(text_width, available_width)
+
+        text_x = x + 20
+        # Move text slightly downward for better vertical centering
+        text_y = y + 22 + (h // 2)
+
+        qimg = QImage(1920, 1080, QImage.Format_ARGB32)
+        qimg.fill(QColor(0, 0, 0, 0))
+        painter = QPainter(qimg)
+        painter.setRenderHints(QPainter.Antialiasing | QPainter.TextAntialiasing)
+
+        self._draw_segments(painter, segments, fm_font, eng_font,
+                            text_x, text_y, h, scale,
+                            bed_config.get('text_color', '#000000'))
+        painter.end()
+
+        img = self._qimage_to_pil(qimg)
+        print(f"  TAG: size={font_size}pt, scale={scale:.2f}, font={font_name}")
         return img
 
     def render_white_bed_text(self, text, bed_config, h_scale=100, letter_spacing=0):
-        """
-        Render White Bed with proper Unicode and left alignment
-        """
+        """Render White Bed using FM SANDHYANEE font. Ignored h_scale and letter_spacing per user request."""
+        # Force h_scale and letter_spacing to defaults for White bed
+        h_scale = 100
+        letter_spacing = 0
         text = str(text)
+        fm_text = convert_unicode_to_fm(text)
+        font_name = self.WHITE_FONT
+        font_size = 48
+
         x = bed_config['x']
         y = bed_config['y']
         w = bed_config['width']
         h = bed_config['height']
-        
-        target_width = w - 40
-        available_width = target_width if h_scale >= 100 else int(target_width * 100 / max(1, h_scale))
-        
-        font_size, text_width, text_height = self.calculate_best_fit_size(text, available_width, 48, min_size=28, letter_spacing=letter_spacing)
-        
-        text_x = x + 20
-        img = Image.new('RGBA', (1920, 1080), (0, 0, 0, 0))
-        
-        if h_scale < 100:
-            self._render_squeezed_text(img, text, font_size, text_x, y, text_width, h, bed_config.get('text_color', '#000000'), h_scale, letter_spacing)
+
+        fm_font = self._get_qfont(font_name, font_size, letter_spacing)
+        eng_font = self._get_qfont(ENGLISH_FONT_NAME, font_size, letter_spacing, bold=True)
+
+        if has_english_segments(fm_text):
+            segments = split_fm_and_english(fm_text)
         else:
-            qimg = QImage(1920, 1080, QImage.Format_ARGB32)
-            qimg.fill(QColor(0,0,0,0))
-            painter = QPainter(qimg)
-            painter.setRenderHints(QPainter.Antialiasing | QPainter.TextAntialiasing)
-            painter.setFont(self._get_qfont(font_size, letter_spacing))
-            painter.setPen(QColor(bed_config.get('text_color', '#000000')))
-            rect = QRect(text_x, y, w - 20, h)
-            painter.drawText(rect, Qt.AlignLeft | Qt.AlignVCenter | Qt.TextDontClip, text)
-            painter.end()
-            img = self._qimage_to_pil(qimg)
-            
-        print(f"  White: size={font_size}pt, width={text_width}px/{target_width}px, pos=({text_x},{y})")
+            segments = [(fm_text, True)]
+
+        text_width = self._measure_segments_width(segments, fm_font, eng_font)
+        available_width = w - 40
+
+        if h_scale < 100:
+            scale = h_scale / 100.0
+        else:
+            scale = self._compute_fit_scale(text_width, available_width)
+
+        text_x = x + 20
+        text_y = y + (h // 2)
+
+        qimg = QImage(1920, 1080, QImage.Format_ARGB32)
+        qimg.fill(QColor(0, 0, 0, 0))
+        painter = QPainter(qimg)
+        painter.setRenderHints(QPainter.Antialiasing | QPainter.TextAntialiasing)
+
+        self._draw_segments(painter, segments, fm_font, eng_font,
+                            text_x, text_y, h, scale,
+                            bed_config.get('text_color', '#000000'))
+        painter.end()
+
+        img = self._qimage_to_pil(qimg)
+        print(f"  White: size={font_size}pt, scale={scale:.2f}, font={font_name}")
         return img
 
     def save_png(self, img, filepath):
-        """Save PNG with UTF-8 filename support"""
+        """Save PNG with UTF-8 filename support."""
         try:
             os.makedirs(os.path.dirname(filepath), exist_ok=True)
             img.save(filepath, 'PNG')

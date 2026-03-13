@@ -3,37 +3,36 @@ class TextValidator:
     Validates TAG / White Bed text against word-count rules.
     """
 
-    def __init__(self, settings):
-        v = settings.get('validation') or {}
-        self.max_words_warning    = v.get('max_words_warning', 9)
-        self.max_words_with_short = v.get('max_words_with_short', 13)
-        self.short_word_length    = v.get('short_word_length', 3)
+    def __init__(self, settings=None):
+        # Validation limits are now hard-coded per bed
+        self.limits = {
+            'topic': 12,
+            'white': 15,
+            'tag': 20
+        }
 
     def validate_tag_line(self, text):
         """
         Returns (is_valid, message | None).
-        - Up to 9 words → OK
-        - 10-13 words with ≥3 short words (≤3 chars) → Warning but allowed
+        - Up to 20 words → OK
         - Otherwise → Error
         """
         words      = text.split()
         word_count = len(words)
 
-        if word_count == 0:
+        if word_count == 0 or word_count <= self.limits['tag']:
             return True, None
 
-        if word_count <= self.max_words_warning:
-            return True, None
-
-        short_words = [w for w in words if len(w) <= self.short_word_length]
-
-        if word_count <= self.max_words_with_short and len(short_words) >= 3:
-            return True, f"⚠ {word_count} words (OK – contains short words)"
-
-        return False, f"✖ {word_count} words exceeds limit ({self.max_words_warning})"
+        return False, f"✖ {word_count} words exceeds limit ({self.limits['tag']})"
 
     def validate_white_bed(self, text):
-        return self.validate_tag_line(text)
+        words      = text.split()
+        word_count = len(words)
+
+        if word_count == 0 or word_count <= self.limits['white']:
+            return True, None
+
+        return False, f"✖ {word_count} words exceeds limit ({self.limits['white']})"
 
     def validate_all(self, tag_lines, white_text):
         """

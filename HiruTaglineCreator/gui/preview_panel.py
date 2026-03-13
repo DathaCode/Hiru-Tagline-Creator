@@ -159,14 +159,12 @@ class PreviewPanel(ttk.Frame):
         
         for i, line in enumerate(tag_lines):
             word_count = len(line.split())
-            if word_count > 9:
-                short_words = [w for w in line.split() if len(w) <= 3]
-                if word_count > 13 or len(short_words) < 3:
-                    warnings.append(f"Line {i+1} exceeds limit ({word_count} words)")
+            if word_count > 20:
+                warnings.append(f"TAG Line {i+1} exceeds limit ({word_count} words)")
                     
         if white_text:
             word_count = len(white_text.split())
-            if word_count > 9:
+            if word_count > 15:
                 warnings.append(f"White Bed exceeds limit ({word_count} words)")
                 
         if warnings:

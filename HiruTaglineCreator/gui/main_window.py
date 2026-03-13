@@ -45,8 +45,8 @@ class TopicBedInput(ttk.Frame):
         )
         self.preview_label.pack(fill=tk.X, padx=5, pady=2)
 
-        self.char_label = ttk.Label(self, text="0 characters")
-        self.char_label.pack(anchor=tk.W, padx=5)
+        self.word_label = ttk.Label(self, text="0 words")
+        self.word_label.pack(anchor=tk.W, padx=5)
 
     def toggle_language(self):
         self.sinhala_mode.set(not self.sinhala_mode.get())
@@ -60,7 +60,10 @@ class TopicBedInput(ttk.Frame):
         raw_text = self.entry.get()
         converted = convert_text(raw_text) if self.sinhala_mode.get() else raw_text
         self.preview_label.config(text=converted)
-        self.char_label.config(text=f"{len(converted)} characters")
+        words = len(converted.split())
+        color = "red" if words > 12 else "black"
+        warn  = " ⚠️ (max: 12)" if words > 12 else ""
+        self.word_label.config(text=f"{words} words{warn}", foreground=color)
         if hasattr(self.app, 'schedule_preview_update'):
             self.app.schedule_preview_update()
 
@@ -212,8 +215,8 @@ class WhiteBedInput(ttk.Frame):
         self.preview_label.config(text=converted)
 
         words = len(converted.split())
-        color = "red" if words > 9 else "black"
-        warn  = " ⚠️ (recommended: ≤9)" if words > 9 else ""
+        color = "red" if words > 15 else "black"
+        warn  = " ⚠️ (max: 15)" if words > 15 else ""
         self.word_label.config(text=f"{words} words{warn}", foreground=color)
         if hasattr(self.app, 'schedule_preview_update'):
             self.app.schedule_preview_update()

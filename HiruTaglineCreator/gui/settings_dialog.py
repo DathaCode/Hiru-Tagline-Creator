@@ -229,28 +229,10 @@ class SettingsDialog(tk.Toplevel):
                             variable=self.date_var, value=fmt).pack(anchor=tk.W)
 
 
-
         # Validation
         val_lf = ttk.LabelFrame(tab, text="Text Validation", padding=8)
         val_lf.pack(fill=tk.X, pady=4)
-
-        vr1 = ttk.Frame(val_lf); vr1.pack(fill=tk.X, pady=1)
-        ttk.Label(vr1, text="Max words (warning):").pack(side=tk.LEFT)
-        self.max_words_var = tk.IntVar(
-            value=self.config_mgr.get("validation", "max_words_warning", 9))
-        ttk.Spinbox(vr1, from_=5, to=20, textvariable=self.max_words_var, width=6).pack(side=tk.LEFT, padx=4)
-
-        vr2 = ttk.Frame(val_lf); vr2.pack(fill=tk.X, pady=1)
-        ttk.Label(vr2, text="Max words with short words:").pack(side=tk.LEFT)
-        self.max_short_var = tk.IntVar(
-            value=self.config_mgr.get("validation", "max_words_with_short", 13))
-        ttk.Spinbox(vr2, from_=5, to=25, textvariable=self.max_short_var, width=6).pack(side=tk.LEFT, padx=4)
-
-        vr3 = ttk.Frame(val_lf); vr3.pack(fill=tk.X, pady=1)
-        ttk.Label(vr3, text="Short word length (chars):").pack(side=tk.LEFT)
-        self.short_len_var = tk.IntVar(
-            value=self.config_mgr.get("validation", "short_word_length", 3))
-        ttk.Spinbox(vr3, from_=1, to=5, textvariable=self.short_len_var, width=6).pack(side=tk.LEFT, padx=4)
+        ttk.Label(val_lf, text="Validation limits are now hard-coded per bed:\n• Topic: 12 words\n• White: 15 words\n• Tag: 20 words").pack(anchor=tk.W)
 
     def _browse_save_loc(self):
         d = filedialog.askdirectory()
@@ -328,10 +310,7 @@ class SettingsDialog(tk.Toplevel):
         s.setdefault("window", {})["remember_position"] = self.remember_var.get()
 
         # Validation
-        s.setdefault("validation", {})["max_words_warning"]    = self.max_words_var.get()
-        s["validation"]["max_words_with_short"] = self.max_short_var.get()
-        s["validation"]["short_word_length"]    = self.short_len_var.get()
-
+        # Validation constraints are now hardcoded in the UI classes.
         self.config_mgr.save()
         self.result = True
         self.destroy()

@@ -319,7 +319,14 @@ class GenerationPanel(ttk.LabelFrame):
 
             # Composite text on template
             if base_img:
-                img = Image.alpha_composite(base_img.convert('RGBA'), text_layer)
+                comp = base_img.convert('RGBA')
+                # Clear pre-baked topic bed red bar so dynamic sizing works
+                if kind == 'topic' and bed:
+                    bx, by = bed.get('x', 126), bed.get('y', 750)
+                    bh = bed.get('height', 64)
+                    cw = 1800  # Wide enough to erase all anti-aliased right edges
+                    comp.paste(Image.new('RGBA', (cw, bh), (0,0,0,0)), (bx, by))
+                img = Image.alpha_composite(comp, text_layer)
             else:
                 img = text_layer
 
@@ -385,7 +392,13 @@ class GenerationPanel(ttk.LabelFrame):
                     base_img = self.text_renderer.template_mgr.get_template_image(template)
                     text_layer = self.text_renderer.render_topic_bed(topic, bed, letter_spacing)
                     if base_img:
-                        img = Image.alpha_composite(base_img.convert('RGBA'), text_layer)
+                        comp = base_img.convert('RGBA')
+                        # Clear pre-baked topic bed red bar so dynamic sizing works
+                        bx, by = bed.get('x', 126), bed.get('y', 750)
+                        bh = bed.get('height', 64)
+                        cw = 1800  # Wide enough to erase all anti-aliased right edges
+                        comp.paste(Image.new('RGBA', (cw, bh), (0,0,0,0)), (bx, by))
+                        img = Image.alpha_composite(comp, text_layer)
                     else:
                         img = text_layer
                     filename = f"TopicBed_{date}.png"

@@ -144,9 +144,18 @@ class TextRenderer:
         font_name = self.TOPIC_FONT
         font_size = 50.4
 
-        x = bed_config['x']
+        # Red bed left edge fills the gap (x=126, matches original template)
+        bed_x = 126
         y = bed_config['y']
+        
+        # Original template red bar has slight anti-aliasing artifacts; 
+        # ensure our new red bar covers the exact vertical space height=60
         h = bed_config['height']
+
+        # Text left-aligned at x=160 (same as TAG/WHITE beds)
+        # 160 - 126 = 34px left padding inside red bed
+        LEFT_PAD = 34
+        RIGHT_PAD = 34
 
         fm_font = self._get_qfont(font_name, font_size, letter_spacing)
         eng_font = self._get_qfont(ENGLISH_FONT_NAME, font_size, letter_spacing, bold=True)
@@ -159,13 +168,17 @@ class TextRenderer:
 
         text_width = self._measure_segments_width(segments, fm_font, eng_font)
 
-        # Background width
-        bg_width = text_width + 80
-        bg_width = max(bg_width, bed_config.get('width_min', 370))
-        bg_width = min(bg_width, bed_config.get('width_max', 1110))
+        # Max bg width the red bed can grow to
+        max_bg = bed_config.get('width_max', 1780)
+        available_text_width = max_bg - LEFT_PAD - RIGHT_PAD
 
-        available_width = bg_width - 40
-        scale = self._compute_fit_scale(text_width, available_width)
+        # Compress only if text exceeds max available width
+        scale = self._compute_fit_scale(text_width, available_text_width)
+        scaled_text_w = text_width * scale
+
+        # Red background width = left pad + scaled text + right pad
+        bg_width = int(LEFT_PAD + scaled_text_w + RIGHT_PAD)
+        bg_width = min(bg_width, max_bg)
 
         qimg = QImage(1920, 1080, QImage.Format_ARGB32)
         qimg.fill(QColor(0, 0, 0, 0))
@@ -173,12 +186,12 @@ class TextRenderer:
         painter = QPainter(qimg)
         painter.setRenderHints(QPainter.Antialiasing | QPainter.TextAntialiasing)
 
-        # Red background
+        # Red background — left edge at bed_x=126, width scales with text
         bg_color = QColor(bed_config.get('bg_color', '#a70003'))
-        painter.fillRect(x, y, bg_width, h, bg_color)
+        painter.fillRect(bed_x, y, bg_width, h, bg_color)
 
-        # Draw text — shifted slightly right (+30) and vertically centered
-        text_x = x + 30
+        # Text left-aligned at bed_x + LEFT_PAD (= 160, same as TAG/WHITE beds)
+        text_x = bed_x + LEFT_PAD
         text_y = y + (h // 2)
 
         self._draw_segments(painter, segments, fm_font, eng_font,
@@ -186,7 +199,7 @@ class TextRenderer:
                             bed_config.get('text_color', '#FFFFFF'))
         painter.end()
 
-        print(f"  Topic: size={font_size}pt, bg={bg_width}px, scale={scale:.2f}, font={font_name}")
+        print(f"  Topic: size={font_size}pt, bg={bg_width}px, scale={scale:.2f}, text_w={text_width:.0f}, font={font_name}")
         return self._qimage_to_pil(qimg)
 
     def render_tag_bed_text(self, text, bed_config, h_scale=100, letter_spacing=0):

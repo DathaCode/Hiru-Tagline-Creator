@@ -9,17 +9,17 @@ from PIL import Image
 #   WHITE     (White Bed):    x=141, y=898, width=1457, height=48
 #
 # SUB_TAG layout (1920×1080):
-#   RED bar   (topic line):   x=126, y=754, extends rightward, height=60
+#   RED bar   (topic line):   x=126, y=750, extends rightward, height=64
 #   ORANGE 1  (TAG Bed):      x=140, y=814, width=1459, height=44
 #   ORANGE 2  (White Bed):    x=140, y=907, width=1459, height=48
 
 MAIN_TAG_BEDS = {
     'TOPIC_BED': {
         'x': 126,
-        'y': 754,
+        'y': 750,
         'width_min': 485,       # minimum width (matches existing red bar)
         'width_max': 1780,      # max allowed width
-        'height': 60,
+        'height': 64,
         'bg_color':   '#a70003',
         'text_color': '#FFFFFF',
         'font': 'FM GANGANEE',
@@ -31,7 +31,7 @@ MAIN_TAG_BEDS = {
         'y': 814,
         'width': 1459,
         'height': 44,
-        'text_color': '#000000',
+        'text_color': '#231F20',
         'font': 'FM SANDHYANEE',
         'alignment': 'center'
     },
@@ -40,7 +40,7 @@ MAIN_TAG_BEDS = {
         'y': 898,
         'width': 1457,
         'height': 48,
-        'text_color': '#000000',
+        'text_color': '#231F20',
         'font': 'FM SANDHYANEE',
         'alignment': 'center'
     }
@@ -49,10 +49,10 @@ MAIN_TAG_BEDS = {
 SUB_TAG_BEDS = {
     'TOPIC_BED': {
         'x': 126,
-        'y': 754,
+        'y': 750,
         'width_min': 485,
         'width_max': 1780,
-        'height': 60,
+        'height': 64,
         'bg_color':   '#a70003',
         'text_color': '#FFFFFF',
         'font': 'FM GANGANEE',
@@ -64,7 +64,7 @@ SUB_TAG_BEDS = {
         'y': 814,
         'width': 1459,
         'height': 44,
-        'text_color': '#000000',
+        'text_color': '#231F20',
         'font': 'FM SANDHYANEE',
         'alignment': 'center'
     }

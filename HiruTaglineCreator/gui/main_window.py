@@ -575,6 +575,15 @@ class MainWindow(tk.Tk):
                     try:
                         bed_config = get_bed('TOPIC_BED')
                         if bed_config:
+                            # Clear the pre-baked red bar from the template so our
+                            # dynamically-sized red bar is the only one visible.
+                            bx = bed_config.get('x', 126)
+                            by = bed_config.get('y', 750)
+                            bh = bed_config.get('height', 64)
+                            cw = 1800  # Wide enough to erase all anti-aliased right edges
+                            clear_patch = Image.new('RGBA', (cw, bh), (0, 0, 0, 0))
+                            preview_img.paste(clear_patch, (bx, by))
+                            
                             topic_img = renderer.render_topic_bed(topic_text, bed_config, letter_spacing)
                             preview_img = Image.alpha_composite(preview_img, topic_img.convert('RGBA'))
                     except Exception as ex:

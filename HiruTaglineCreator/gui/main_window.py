@@ -273,7 +273,7 @@ class MainWindow(tk.Tk):
         self.session_var   = tk.StringVar()
         self.session_combo = ttk.Combobox(top, textvariable=self.session_var, state="readonly", width=28)
         self.session_combo.pack(side=tk.LEFT, padx=(6, 0))
-        self._refresh_session_list()
+        self.session_combo.bind("<<ComboboxSelected>>", self._on_session_selected)
 
         b1 = ttk.Button(top, text="🆕 New",      command=self._new_session); b1.pack(side=tk.LEFT, padx=4)
         b2 = ttk.Button(top, text="💾 Save",     command=self._save_session); b2.pack(side=tk.LEFT, padx=4)
@@ -631,11 +631,63 @@ class MainWindow(tk.Tk):
         white = self.white_input.get_text()
         self.gen_panel.update_text_labels(topic, white)
 
+    def _on_session_selected(self, event=None):
+        selected_session = self.session_var.get()
+        if not selected_session:
+            return
+            
+        self.session_mgr.current_session_path = os.path.join(self.session_mgr.base_dir, selected_session)
+        
+        draft = self.session_mgr.load_draft()
+        if draft:
+            content = draft.get("content", {})
+            
+            if "topic_bed_raw" in content:
+                self.topic_input.set_text(content.get("topic_bed_raw", ""))
+            else:
+                self.topic_input.set_text(content.get("topic_bed", ""))
+                
+            if "tag_lines_raw" in content:
+                self.tag_input.set_text(content.get("tag_lines_raw", ""))
+            else:
+                lines = content.get("tag_lines", [])
+                self.tag_input.set_text("\n".join(lines))
+                
+            if "white_bed_raw" in content:
+                self.white_input.set_text(content.get("white_bed_raw", ""))
+            else:
+                self.white_input.set_text(content.get("white_bed", ""))
+            
+            template_type = draft.get("template_type", "MAIN_TAG")
+            if template_type == "MAIN_TAG":
+                self.notebook.select(0)
+            elif template_type == "SUB_TAG":
+                self.notebook.select(1)
+            
+            adj = draft.get("adjustments", {})
+            self.h_scale_var.set(adj.get("h_scale", 100))
+            self.adjustments["h_scale"] = adj.get("h_scale", 100)
+            self.scale_value_label.config(text=f"{self.adjustments['h_scale']}%")
+            
+            self.letter_spacing_var.set(adj.get("letter_spacing", 0))
+            self.adjustments["letter_spacing"] = adj.get("letter_spacing", 0)
+            self.ls_value_label.config(text=f"{self.adjustments['letter_spacing']} px")
+            
+            self.status_var.set(f"Loaded session '{selected_session}'")
+            self.schedule_preview_update()
+        else:
+            self._clear_all()
+            self.status_var.set(f"Session '{selected_session}' has no saved draft.")
+
     def _new_session(self):
         name = simpledialog.askstring("New Session", "Enter session name (e.g. AKUREGODA):", parent=self)
         if not name: return
         path = self.session_mgr.create_session(name.strip().upper())
         self._refresh_session_list()
+        
+        folder_name = os.path.basename(path)
+        self.session_var.set(folder_name)
+        
         self._clear_all()
         self.status_var.set(f"Session '{name}' created → {path}")
 
@@ -646,7 +698,14 @@ class MainWindow(tk.Tk):
         draft = {
             "session_name":   self.session_var.get(),
             "template_type":  self.current_template,
-            "content": {"topic_bed": self.topic_input.get_text(), "tag_lines": self.tag_input.get_lines(), "white_bed": self.white_input.get_text()},
+            "content": {
+                "topic_bed": self.topic_input.get_text(), 
+                "tag_lines": self.tag_input.get_lines(), 
+                "white_bed": self.white_input.get_text(),
+                "topic_bed_raw": self.topic_input.get_raw_text(),
+                "tag_lines_raw": self.tag_input.get_raw_text(),
+                "white_bed_raw": self.white_input.get_raw_text(),
+            },
             "adjustments": self.adjustments,
         }
         self.session_mgr.save_draft(draft)
@@ -655,8 +714,14 @@ class MainWindow(tk.Tk):
     def _refresh_session_list(self):
         sessions = self.session_mgr.list_sessions()
         self.session_combo['values'] = sessions
-        if sessions and not self.session_var.get():
+        current_session = self.session_var.get()
+        if current_session in sessions:
+            pass
+        elif sessions:
             self.session_combo.current(0)
+            self._on_session_selected()
+        else:
+            self.session_var.set("")
 
     def _open_folder(self):
         path = self.session_mgr.get_session_path()
@@ -669,6 +734,7 @@ class MainWindow(tk.Tk):
         self.wait_window(dlg)
         if dlg.result:
             self.validator = TextValidator(self.settings_mgr.settings)
+            self._refresh_session_list()
             self.status_var.set("Settings saved")
             self.schedule_preview_update()
 

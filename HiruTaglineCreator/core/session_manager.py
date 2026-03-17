@@ -8,9 +8,12 @@ class SessionManager:
     """
     def __init__(self, settings):
         self.settings = settings
-        self.base_dir = self.settings.get("session", "default_save_location", "C:/HiruTaglines/")
         self.current_session_path = None
         self.unsaved_changes = False
+
+    @property
+    def base_dir(self):
+        return self.settings.get("session", "default_save_location", "C:/HiruTaglines/")
 
     def create_session(self, session_name):
         """Create new session folder."""

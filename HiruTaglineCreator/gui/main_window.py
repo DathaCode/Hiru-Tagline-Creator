@@ -683,10 +683,12 @@ class MainWindow(tk.Tk):
         name = simpledialog.askstring("New Session", "Enter session name (e.g. AKUREGODA):", parent=self)
         if not name: return
         path = self.session_mgr.create_session(name.strip().upper())
-        self._refresh_session_list()
         
+        # Set session_var BEFORE refreshing the list so _refresh_session_list
+        # recognises the new session and doesn't fall back to a previous one.
         folder_name = os.path.basename(path)
         self.session_var.set(folder_name)
+        self._refresh_session_list()
         
         self._clear_all()
         self.status_var.set(f"Session '{name}' created → {path}")

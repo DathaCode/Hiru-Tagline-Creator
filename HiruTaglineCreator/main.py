@@ -38,7 +38,7 @@ def main():
     """
     Application entry point
     """
-    print("Hiru News Tagline Creator v1.0.0")
+    print("Hiru News Tagline Creator v1.5.0")
     print("Initializing...")
     
     # 1. Load settings

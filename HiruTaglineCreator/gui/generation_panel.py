@@ -3,6 +3,7 @@ from tkinter import ttk, messagebox
 from PIL import Image, ImageTk
 import os
 import datetime
+import time
 
 
 class ProgressDialog(tk.Toplevel):
@@ -377,6 +378,9 @@ class GenerationPanel(ttk.LabelFrame):
         prog = ProgressDialog(self.winfo_toplevel())
         generated, gen_errors = [], []
         done = 0
+        base_time = time.time()
+        file_counter = 0
+        seq_num = 0  # sequential number for filename ordering
 
         # Get horizontal scale and letter spacing
         h_scale = adj.get('h_scale', 100)
@@ -401,9 +405,13 @@ class GenerationPanel(ttk.LabelFrame):
                         img = Image.alpha_composite(comp, text_layer)
                     else:
                         img = text_layer
-                    filename = f"TopicBed_{date}.png"
+                    seq_num += 1
+                    filename = f"{seq_num:03d}_TopicBed_{date}.png"
                     filepath = os.path.join(session_path, filename)
                     self.text_renderer.save_png(img, filepath)
+                    file_counter += 1
+                    target_time = base_time + file_counter
+                    os.utime(filepath, (target_time, target_time))
                     generated.append(filepath)
                 except Exception as e:
                     gen_errors.append(f"Topic Bed: {e}")
@@ -427,9 +435,13 @@ class GenerationPanel(ttk.LabelFrame):
                         for ch in r'\/:*?"<>|':
                             prefix = prefix.replace(ch, '')
                         
-                        filename = f"{prefix or 'Untitled'}_TAG_{date}.png"
+                        seq_num += 1
+                        filename = f"{seq_num:03d}_{prefix or 'Untitled'}_TAG_{date}.png"
                         filepath = os.path.join(session_path, filename)
                         self.text_renderer.save_png(img, filepath)
+                        file_counter += 1
+                        target_time = base_time + file_counter
+                        os.utime(filepath, (target_time, target_time))
                         generated.append(filepath)
                     except Exception as e:
                         gen_errors.append(f"TAG {i+1}: {e}")
@@ -451,9 +463,13 @@ class GenerationPanel(ttk.LabelFrame):
                     for ch in r'\/:*?"<>|':
                         prefix = prefix.replace(ch, '')
                         
-                    filename = f"{prefix or 'Untitled'}_WhiteBed_{date}.png"
+                    seq_num += 1
+                    filename = f"{seq_num:03d}_{prefix or 'Untitled'}_WhiteBed_{date}.png"
                     filepath = os.path.join(session_path, filename)
                     self.text_renderer.save_png(img, filepath)
+                    file_counter += 1
+                    target_time = base_time + file_counter
+                    os.utime(filepath, (target_time, target_time))
                     generated.append(filepath)
                 except Exception as e:
                     gen_errors.append(f"White Bed: {e}")

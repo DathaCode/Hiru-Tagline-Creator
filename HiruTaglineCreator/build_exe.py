@@ -10,7 +10,7 @@ PyInstaller.__main__.run([
     '--onefile',
     '--windowed',
     '--icon=assets/app_icon.ico',
-    '--name=HiruTaglineCreator_v1.5',
+    '--name=HiruTaglineCreator_v2.0',
     '--add-data=templates;templates',
     '--add-data=assets;assets',
     '--add-data=config;config',

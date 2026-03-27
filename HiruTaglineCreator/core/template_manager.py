@@ -63,7 +63,7 @@ SUB_TAG_BEDS = {
         'x': 140,
         'y': 814,
         'width': 1459,
-        'height': 44,
+        'height': 141,           # Taller bed to fit 2 text lines (rows 814-955)
         'text_color': '#231F20',
         'font': 'FM SANDHYANEE',
         'alignment': 'center'

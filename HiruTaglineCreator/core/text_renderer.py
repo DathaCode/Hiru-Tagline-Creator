@@ -248,6 +248,65 @@ class TextRenderer:
         print(f"  TAG: size={font_size}pt, scale={scale:.2f}, font={font_name}")
         return img
 
+    def render_sub_tag_bed_text(self, line1, line2, bed_config, h_scale=100, letter_spacing=0):
+        """Render SUB TAG Bed with two text lines (paired).
+
+        The SUB_TAG bed is 141px tall and accommodates two lines of text.
+        Line 1 is rendered in the upper portion, line 2 in the lower.
+        """
+        font_name = self.TAG_FONT
+        font_size = 50  # Slightly smaller than single-line TAG (60px) to fit 2 lines
+
+        x = bed_config['x']
+        y = bed_config['y']
+        w = bed_config['width']
+        h = bed_config['height']  # 141px for SUB_TAG
+
+        line_render_h = 60  # Height rect for text alignment per line
+
+        qimg = QImage(1920, 1080, QImage.Format_ARGB32)
+        qimg.fill(QColor(0, 0, 0, 0))
+        painter = QPainter(qimg)
+        painter.setRenderHints(QPainter.Antialiasing | QPainter.TextAntialiasing)
+
+        text_color = bed_config.get('text_color', '#000000')
+
+        # Vertical positions for each line center
+        # Bed spans y to y+141: line1 ~upper third, line2 ~lower third
+        line_positions = [y + 36, y + 103]
+
+        for line_idx, line_text in enumerate([line1, line2]):
+            if not line_text:
+                continue
+
+            fm_text = convert_unicode_to_fm(str(line_text))
+            fm_font = self._get_qfont(font_name, font_size, letter_spacing)
+            eng_font = self._get_qfont(ENGLISH_FONT_NAME, font_size, letter_spacing, bold=True)
+
+            if has_english_segments(fm_text):
+                segments = split_fm_and_english(fm_text)
+            else:
+                segments = [(fm_text, True)]
+
+            text_width = self._measure_segments_width(segments, fm_font, eng_font)
+            available_width = w - 40
+
+            if h_scale < 100:
+                scale = h_scale / 100.0
+            else:
+                scale = self._compute_fit_scale(text_width, available_width)
+
+            text_x = x + 20
+            text_y = line_positions[line_idx]
+
+            self._draw_segments(painter, segments, fm_font, eng_font,
+                                text_x, text_y, line_render_h, scale, text_color)
+
+        painter.end()
+        img = self._qimage_to_pil(qimg)
+        print(f"  SUB TAG: size={font_size}pt, 2 lines, font={font_name}")
+        return img
+
     def render_white_bed_text(self, text, bed_config, h_scale=100, letter_spacing=0):
         """Render White Bed using FM SANDHYANEE font. Ignored h_scale and letter_spacing per user request."""
         # Force h_scale and letter_spacing to defaults for White bed

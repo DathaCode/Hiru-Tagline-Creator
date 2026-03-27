@@ -456,6 +456,9 @@ class MainWindow(tk.Tk):
 
             self.current_template = new_template
             self.preview_panel.load_template(self.current_template)
+
+            # Update generation panel for new template type
+            self.gen_panel.set_template_type(new_template)
             
             # Show/Hide logic exactly as requested
             if new_template == 'MAIN_TAG':
@@ -560,7 +563,22 @@ class MainWindow(tk.Tk):
             tag_lines = self.tag_input.get_lines() if hasattr(self, 'tag_input') else []
 
             # Update the TAG selector dropdown list
-            self.preview_panel.update_tag_selector(tag_lines)
+            if template_type == 'SUB_TAG':
+                # Show pairs in the selector
+                pairs = []
+                for p in range(0, len(tag_lines), 2):
+                    l1 = tag_lines[p][:25] if p < len(tag_lines) else ''
+                    l2 = tag_lines[p+1][:25] if p+1 < len(tag_lines) else ''
+                    pairs.append(f"Pair {len(pairs)+1}: {l1}...")
+                self.preview_panel.tag_selector['values'] = pairs
+                if pairs:
+                    idx = self.preview_panel.selected_tag_index
+                    if idx >= len(pairs):
+                        idx = 0
+                        self.preview_panel.selected_tag_index = 0
+                    self.preview_panel.tag_selector.current(idx)
+            else:
+                self.preview_panel.update_tag_selector(tag_lines)
 
             # Respect the DROPDOWN selection — do NOT override with cursor position.
             selected_index = self.get_selected_tag_index()
@@ -580,7 +598,7 @@ class MainWindow(tk.Tk):
                             bx = bed_config.get('x', 126)
                             by = bed_config.get('y', 750)
                             bh = bed_config.get('height', 64)
-                            cw = 1800  # Wide enough to erase all anti-aliased right edges
+                            cw = 1800
                             clear_patch = Image.new('RGBA', (cw, bh), (0, 0, 0, 0))
                             preview_img.paste(clear_patch, (bx, by))
                             
@@ -589,16 +607,33 @@ class MainWindow(tk.Tk):
                     except Exception as ex:
                         print(f'\u2717 Topic Bed render error: {ex}')
             
-            # TAG BED — show the line selected in the dropdown
-            if tag_lines and 0 <= selected_index < len(tag_lines):
-                selected_line = tag_lines[selected_index]
-                try:
-                    bed_config = get_bed('TAG_BED')
-                    if bed_config:
-                        tag_img = renderer.render_tag_bed_text(selected_line, bed_config, h_scale, letter_spacing)
-                        preview_img = Image.alpha_composite(preview_img, tag_img.convert('RGBA'))
-                except Exception as ex:
-                    print(f'\u2717 TAG Bed render error: {ex}')
+            # TAG BED — show the selected tag/pair in the dropdown
+            if template_type == 'SUB_TAG':
+                # SUB_TAG: render 2 lines per pair
+                pair_count = (len(tag_lines) + 1) // 2
+                if tag_lines and 0 <= selected_index < pair_count:
+                    try:
+                        bed_config = get_bed('TAG_BED')
+                        if bed_config:
+                            s = selected_index * 2
+                            l1 = tag_lines[s] if s < len(tag_lines) else ''
+                            l2 = tag_lines[s+1] if s+1 < len(tag_lines) else ''
+                            tag_img = renderer.render_sub_tag_bed_text(
+                                l1, l2, bed_config, h_scale, letter_spacing)
+                            preview_img = Image.alpha_composite(preview_img, tag_img.convert('RGBA'))
+                    except Exception as ex:
+                        print(f'\u2717 SUB TAG Bed render error: {ex}')
+            else:
+                # MAIN_TAG: single line
+                if tag_lines and 0 <= selected_index < len(tag_lines):
+                    selected_line = tag_lines[selected_index]
+                    try:
+                        bed_config = get_bed('TAG_BED')
+                        if bed_config:
+                            tag_img = renderer.render_tag_bed_text(selected_line, bed_config, h_scale, letter_spacing)
+                            preview_img = Image.alpha_composite(preview_img, tag_img.convert('RGBA'))
+                    except Exception as ex:
+                        print(f'\u2717 TAG Bed render error: {ex}')
             
             # WHITE BED — MAIN TAG only
             if template_type == 'MAIN_TAG':
@@ -621,14 +656,14 @@ class MainWindow(tk.Tk):
 
     def _get_inputs(self):
         """Returns exact converted text for PNG generation."""
-        topic = self.get_topic_text_for_rendering() if self.current_template == "MAIN_TAG" else ""
+        topic = self.get_topic_text_for_rendering()
         tags  = self.get_tag_lines_for_rendering()
-        white = self.get_white_text_for_rendering()
+        white = self.get_white_text_for_rendering() if self.current_template == "MAIN_TAG" else ""
         return topic, tags, white
 
     def _push_text_labels(self):
-        topic = self.topic_input.get_text() if self.current_template == "MAIN_TAG" else ""
-        white = self.white_input.get_text()
+        topic = self.get_topic_text_for_rendering()
+        white = self.get_white_text_for_rendering() if self.current_template == "MAIN_TAG" else ""
         self.gen_panel.update_text_labels(topic, white)
 
     def _on_session_selected(self, event=None):

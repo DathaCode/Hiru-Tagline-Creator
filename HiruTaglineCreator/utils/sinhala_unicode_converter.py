@@ -108,6 +108,7 @@ class SinhalaUnicodeConverter:
             'eyaa': 'එයා',
             'mokada': 'මොකද',
             'kohomada': 'කොහොමද',
+            'dumriya': 'දුම\u0dcarිය',  # Exception: no Rakaransaya for දුම්රිය
         }
     
     def _convert_word(self, word):

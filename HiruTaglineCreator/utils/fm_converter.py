@@ -99,6 +99,13 @@ def convert_unicode_to_fm(text):
     s = s.replace('\u200C', '')  # ZWNJ
 
     # ══════════════════════════════════════════════════════════════
+    # Word-level exceptions (MUST come before conjunct rules)
+    # දුම්රිය should NOT get rakaransaya — keep ම් and ර separate.
+    # FM parts: දු=\u00FF  ම්=\u00EF  රි=\u00DF  ය=h
+    # ══════════════════════════════════════════════════════════════
+    s = s.replace('දුම්රිය', '\u00FF\u00EF\u00DFh')
+
+    # ══════════════════════════════════════════════════════════════
     # Special punctuation pre-processing
     # ══════════════════════════════════════════════════════════════
     s = s.replace('ද්ර', 'ø')

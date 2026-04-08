@@ -342,6 +342,12 @@ def convert_unicode_to_fm(text):
     s = s.replace('්රී', 'S%')
 
     # ══════════════════════════════════════════════════════════════
+    # Exception: after ර්, never apply yansaya. Keep ර් and ය separate.
+    # Convert ර් to FM code now; ය stays Unicode for vowel-combo rules.
+    # ══════════════════════════════════════════════════════════════
+    s = s.replace('ර්ය', '\u00BEය')
+
+    # ══════════════════════════════════════════════════════════════
     # Yansaya bare (්ය) and Rakaransaya bare (්ර)
     # ══════════════════════════════════════════════════════════════
     s = s.replace('්ය', 'H')
@@ -580,7 +586,7 @@ def convert_unicode_to_fm(text):
     s = s.replace('දූ', '\u00A5')      # ¥
     s = s.replace('දී', '\u00A7')      # §
     s = s.replace('ලූ', '\u00C6')      # Æ
-    s = s.replace('ර්ය', '\u00A9')     # ©
+    # ර්ය conjunct removed — ර්ය is now kept as separate ර් + ය (no yansaya)
     s = s.replace('ඳූ', '\u00AA')      # ª
     s = s.replace('ර්', '\u00BE')      # ¾
     s = s.replace('ඨි', '\u00C0')      # À

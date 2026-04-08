@@ -243,7 +243,7 @@ class MainWindow(tk.Tk):
         self.session_mgr  = session_mgr
         self.settings_mgr = settings
 
-        self.title("🎬 Hiru News Tagline Creator v1.1")
+        self.title("🎬 Hiru News Tagline Creator")
         w = self.settings_mgr.get("window", "width",  1600)
         h = self.settings_mgr.get("window", "height", 1000)
         self.geometry(f"{w}x{h}")

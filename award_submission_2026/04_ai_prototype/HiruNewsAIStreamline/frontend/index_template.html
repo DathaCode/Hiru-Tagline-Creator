@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HiruNews AI Streamline — Processing Module</title>
+  <meta name="description" content="AI-powered news tagline generation and editorial workflow for Hiru News. Phase 2 Prototype." />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Noto+Sans+Sinhala:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Design System CSS -->
+  <link rel="stylesheet" href="styles.css" />
+
+  <!-- React 18 UMD (must load BEFORE Babel) -->
+  <script crossorigin src="https://unpkg.com/react@18.2.0/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
+
+  <!-- Recharts UMD (after React) -->
+  <script crossorigin src="https://unpkg.com/recharts@2.12.7/umd/Recharts.js"></script>
+
+  <!-- Babel Standalone for JSX (after React so it can find React global) -->
+  <script crossorigin src="https://unpkg.com/@babel/standalone@7.24.0/babel.min.js"></script>
+
+  <!-- QWebChannel (loaded by Qt, fallback for browser testing) -->
+  <script>
+    // Qt injects qwebchannel.js automatically; for browser testing we provide a mock
+    if (typeof QWebChannel === 'undefined') {
+      window.QWebChannel = function(transport, cb) {
+        cb({
+          objects: {
+            bridge: {
+              start_transcription: function(fp, cb) { if(cb) cb(JSON.stringify({job_id:'mock_job',status:'started'})); return JSON.stringify({job_id:'mock_job',status:'started'}); },
+              get_transcription_status: function(id, cb) { if(cb) cb(JSON.stringify({status:'idle'})); return JSON.stringify({status:'idle'}); },
+              generate_taglines: function(t, b, cb) { if(cb) cb(JSON.stringify({status:'started'})); return JSON.stringify({status:'started'}); },
+              export_handoff: function(s, o, c, cb) {
+                var r = JSON.stringify({success:true, file_path:'data/sessions/'+s+'/ai_handoff.json', message:'Exported successfully (browser mock)'});
+                if(cb) cb(r); return r;
+              },
+              load_dashboard_data: function(cb) {
+                var d = JSON.stringify({
+                  stats:{taglines_today:42,taglines_approved:38,pending_review:4,avg_time_per_tagline:142,trends:{taglines_today_pct:12,approved_pct:8,pending_pct:-3,avg_time_pct:-5}},
+                  chart:[{day:'Dec 4',taglines:28},{day:'Dec 5',taglines:35},{day:'Dec 6',taglines:22},{day:'Dec 7',taglines:40},{day:'Dec 8',taglines:31},{day:'Dec 9',taglines:45},{day:'Dec 10',taglines:42}],
+                  sessions:[
+                    {id:1,session:'AKUREGODA',bulletin_slot:'6:55 PM',taglines:18,status:'Approved',timestamp:'2025-12-10 17:22'},
+                    {id:2,session:'DITWA_CYCLONE',bulletin_slot:'9:55 PM',taglines:24,status:'Approved',timestamp:'2025-12-10 21:10'},
+                    {id:3,session:'MATARA_FLOOD',bulletin_slot:'11:55 AM',taglines:15,status:'Pending Review',timestamp:'2025-12-10 10:44'},
+                    {id:4,session:'PARLIAMENT',bulletin_slot:'6:55 PM',taglines:21,status:'Approved',timestamp:'2025-12-09 17:31'},
+                    {id:5,session:'ECONOMY_Q3',bulletin_slot:'9:55 PM',taglines:19,status:'Approved',timestamp:'2025-12-09 20:58'},
+                    {id:6,session:'GALLE_ROAD',bulletin_slot:'11:55 AM',taglines:12,status:'Rejected',timestamp:'2025-12-08 11:12'},
+                    {id:7,session:'CABINET_MTG',bulletin_slot:'6:55 PM',taglines:17,status:'Approved',timestamp:'2025-12-08 16:45'},
+                    {id:8,session:'HEALTH_MIN',bulletin_slot:'9:55 PM',taglines:20,status:'Changes Requested',timestamp:'2025-12-07 21:03'}
+                  ],
+                  health:[{name:'OpenAI API',status:'Connected',color:'green'},{name:'Local Storage',status:'OK',color:'green'},{name:'HiruTaglineCreator Bridge',status:'Ready',color:'green'}],
+                  performance:{transcription_avg_time:'18.4s',generation_avg_time:'12.1s',success_rate:'96.8%',transcription_pct:92,generation_pct:88,success_pct:97}
+                });
+                if(cb) cb(d); return d;
+              },
+              browse_folder: function(cb) { var r = JSON.stringify({folder:'C:/HiruTaglines'}); if(cb) cb(r); return r; },
+              get_app_info: function(cb) {
+                var r = JSON.stringify({name:'HiruNews AI Streamline',version:'1.0.0-prototype',phase:'Phase 2 Prototype',developer:'Mr. Vidath Dulanjith',company:'Lotus Technologies (Pvt) Ltd',mock_mode:true});
+                if(cb) cb(r); return r;
+              },
+              transcriptionProgress: { connect: function(){} },
+              transcriptionComplete: { connect: function(cb) { window._mockTranscriptionCb = cb; }},
+              taglineComplete: { connect: function(cb) { window._mockTaglineCb = cb; }}
+            }
+          }
+        });
+      };
+      window.qt = { webChannelTransport: null };
+    }
+  </script>
+
+</head>
+<body>
+  <div id="root">
+    <!-- Loading indicator shown until React mounts -->
+    <div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#0A0A0B;">
+      <div style="text-align:center;color:#A1A1AA;font-family:Inter,sans-serif;">
+        <div style="width:40px;height:40px;border:3px solid #27272F;border-top:3px solid #8B5CF6;border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 16px;"></div>
+        <div>Loading HiruNews AI Streamline...</div>
+        <style>@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}</style>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main React App (loaded via Babel standalone) -->
+  <script type="text/babel" src="app.jsx"></script>
+</body>
+</html>

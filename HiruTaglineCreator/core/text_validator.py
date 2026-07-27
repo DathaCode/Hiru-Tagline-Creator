@@ -34,10 +34,10 @@ class TextValidator:
 
         return False, f"✖ {word_count} words exceeds limit ({self.limits['white']})"
 
-    def validate_all(self, tag_lines, white_text):
+    def validate_all(self, tag_lines, white_lines):
         """
         Returns (all_valid: bool, errors: list[str]).
-        Warnings are included in errors list but all_valid may still be True.
+        white_lines may be a list of strings or a single string (backward compat).
         """
         errors    = []
         all_valid = True
@@ -49,11 +49,16 @@ class TextValidator:
             if not valid:
                 all_valid = False
 
-        if white_text:
-            valid, msg = self.validate_white_bed(white_text)
-            if msg:
-                errors.append(f"White Bed: {msg}")
-            if not valid:
-                all_valid = False
+        if isinstance(white_lines, str):
+            white_lines = [white_lines] if white_lines else []
+
+        for i, line in enumerate(white_lines):
+            if line:
+                valid, msg = self.validate_white_bed(line)
+                if msg:
+                    label = f"White Bed {i + 1}" if len(white_lines) > 1 else "White Bed"
+                    errors.append(f"{label}: {msg}")
+                if not valid:
+                    all_valid = False
 
         return all_valid, errors

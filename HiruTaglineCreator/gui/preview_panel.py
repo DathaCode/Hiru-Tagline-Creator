@@ -12,14 +12,16 @@ class PreviewPanel(ttk.Frame):
         self.template_mgr = template_mgr
         self.zoom_level = "Fit"
         self.selected_tag_index = 0
+        self.selected_white_index = 0
         self.current_preview_img = None
         self.photo_img = None
         self.on_tag_select_callback = None  # Set by MainWindow after build
-        
-        # Tools Frame (Zoom, Tag Selector)
+        self.on_white_select_callback = None  # Set by MainWindow after build
+
+        # Tools Frame (Zoom, Tag Selector, White Selector)
         tools_frame = ttk.Frame(self)
         tools_frame.pack(anchor=tk.W, pady=5, fill=tk.X)
-        
+
         ttk.Label(tools_frame, text="Zoom:").pack(side=tk.LEFT)
         self.zoom_var = tk.StringVar(value="Fit")
         zoom_combo = ttk.Combobox(
@@ -31,11 +33,16 @@ class PreviewPanel(ttk.Frame):
         )
         zoom_combo.pack(side=tk.LEFT, padx=(5, 15))
         zoom_combo.bind('<<ComboboxSelected>>', self.on_zoom_change)
-        
+
         ttk.Label(tools_frame, text="Selected TAG:").pack(side=tk.LEFT)
         self.tag_selector = ttk.Combobox(tools_frame, state="readonly", width=15)
         self.tag_selector.pack(side=tk.LEFT, padx=5)
         self.tag_selector.bind('<<ComboboxSelected>>', self.on_tag_select)
+
+        ttk.Label(tools_frame, text="Selected White:").pack(side=tk.LEFT, padx=(10, 0))
+        self.white_selector = ttk.Combobox(tools_frame, state="readonly", width=12)
+        self.white_selector.pack(side=tk.LEFT, padx=5)
+        self.white_selector.bind('<<ComboboxSelected>>', self.on_white_select)
         
         # Warning label
         self.warning_label = ttk.Label(
@@ -78,9 +85,13 @@ class PreviewPanel(ttk.Frame):
 
     def on_tag_select(self, event):
         self.selected_tag_index = self.tag_selector.current()
-        # Trigger re-render via MainWindow callback
         if self.on_tag_select_callback:
             self.on_tag_select_callback()
+
+    def on_white_select(self, event):
+        self.selected_white_index = self.white_selector.current()
+        if self.on_white_select_callback:
+            self.on_white_select_callback()
             
     def on_canvas_resize(self, event):
         if self.zoom_level == "Fit" and self.current_preview_img:
@@ -145,14 +156,29 @@ class PreviewPanel(ttk.Frame):
             self.tag_selector.set('')
             self.selected_tag_index = 0
             return
-            
+
         values = [f"Line {i+1}" for i in range(len(tag_lines))]
         self.tag_selector['values'] = values
-        
+
         if self.selected_tag_index >= len(tag_lines):
             self.selected_tag_index = max(0, len(tag_lines) - 1)
-            
+
         self.tag_selector.current(self.selected_tag_index)
+
+    def update_white_selector(self, white_lines):
+        if not white_lines:
+            self.white_selector['values'] = []
+            self.white_selector.set('')
+            self.selected_white_index = 0
+            return
+
+        values = [f"Line {i+1}" for i in range(len(white_lines))]
+        self.white_selector['values'] = values
+
+        if self.selected_white_index >= len(white_lines):
+            self.selected_white_index = max(0, len(white_lines) - 1)
+
+        self.white_selector.current(self.selected_white_index)
 
     def check_warnings(self, tag_lines, white_text):
         warnings = []

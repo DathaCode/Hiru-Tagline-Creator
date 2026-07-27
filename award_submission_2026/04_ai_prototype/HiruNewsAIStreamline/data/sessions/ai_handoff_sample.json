@@ -1,0 +1,80 @@
+{
+  "version": "2.0",
+  "generator": "HiruNews AI Streamline — Phase 2 Prototype",
+  "session_name": "SAMPLE_SESSION",
+  "created_at": "2025-12-10T17:30:00",
+  "bulletin_slot": "6:55 PM",
+  "priority": "Headline",
+  "content": [
+    {
+      "id": 1,
+      "topic_bed": {
+        "text": "දුම්රිය රියැදුරු පුහුණුවට හමුදාව බඳවා ගැනීම අත්හිටුවයි",
+        "max_words": 12,
+        "background": "red"
+      },
+      "tag_lines": {
+        "lines": [
+          "වෘත්තිය සමිති ක්‍රියාමාර්ගයකදී හමුදාව යොදවන්න 20ක් ගන්නේ නැහැ",
+          "200කට 300කට පුහුණුව ලබා දෙන්න තිබුණා",
+          "දුම්රිය ධාවනය කිරීම කිසිම ගැටලුවක් නැහැ"
+        ],
+        "max_words_per_line": 9,
+        "background": "orange"
+      },
+      "white_bed": {
+        "text": "කෝච්චි පාරවල් මහාමාර්ග හදනවා නම් සැලැස්මක් ඉදිරිපත් කළ යුතුයි",
+        "max_words": 15,
+        "background": "white"
+      },
+      "source_excerpt": "වෘත්තිය සමිති ක්‍රියාමාර්ගයකදී හමුදාව යොදවන්න නම් 20ක් අරගන්නේ..."
+    },
+    {
+      "id": 2,
+      "topic_bed": {
+        "text": "දිට්වා සුළිකුණාටුවේදී ත්‍රිවිධ හමුදාව කටයුතු කළ විදිය",
+        "max_words": 12,
+        "background": "red"
+      },
+      "tag_lines": {
+        "lines": [
+          "මාතර දිස්ත්‍රික්කයේ පවුල් 850ක් අවතැන්",
+          "ආපදා සහන මධ්‍යස්ථාන 12ක් විවෘත කෙරේ",
+          "ගංවතුර තත්ත්වය තවදුරටත් බරපතළ"
+        ],
+        "max_words_per_line": 9,
+        "background": "orange"
+      },
+      "white_bed": {
+        "text": "ත්‍රිවිධ හමුදාව මුළු රට පුරා ආපදා සහන මෙහෙයුම් ක්‍රියාත්මක කරමින් සිටී",
+        "max_words": 15,
+        "background": "white"
+      },
+      "source_excerpt": "දිට්වා සුළිකුණාටුවේදී ත්‍රිවිධ හමුදාව කටයුතු කළ විදිය අපි දැන් බලමු..."
+    }
+  ],
+  "adjustments": {
+    "global_font_scale": 1.0,
+    "topic_bed_color": "#CC0000",
+    "tag_bed_color": "#FF8C00",
+    "white_bed_color": "#FFFFFF"
+  },
+  "ai_metadata": {
+    "model": "gpt-4o",
+    "confidence_scores": [
+      {"suggestion_id": 1, "score": 0.87},
+      {"suggestion_id": 2, "score": 0.89}
+    ],
+    "generation_timestamp": "2025-12-10T17:28:00",
+    "approved_by": "Senior Editor (Hiru News)",
+    "approved_at": "2025-12-10T17:29:30",
+    "approval_checklist": {
+      "facts_verified": true,
+      "no_defamatory_content": true,
+      "broadcasting_standards": true,
+      "sinhala_grammar_reviewed": true,
+      "source_confidentiality": true
+    },
+    "editor_notes": "NOV 6.55 Bulletin — verified against source video"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 -)",
+      "Bash(py -3 -)",
+      "Bash(py -3 -c \"import weasyprint; print\\('weasyprint ok', weasyprint.__version__\\)\")",
+      "Bash(py -3 -m pip install weasyprint)"
+    ]
+  }
+}

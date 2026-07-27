@@ -156,11 +156,18 @@ class TagBedInput(ttk.Frame):
         if hasattr(self.app, 'schedule_preview_update'):
             self.app.schedule_preview_update()
 
-    def get_lines(self):
-        """Returns list of converted Unicode lines from preview widget."""
+    def get_lines(self, preserve_empty=False):
+        """Returns list of converted Unicode lines from preview widget.
+        When preserve_empty=True, interior empty lines are kept (only trailing empties stripped)."""
+        if preserve_empty:
+            text = self.preview.get('1.0', tk.END)
+            lines = [line.strip() for line in text.splitlines()]
+            while lines and not lines[-1]:
+                lines.pop()
+            return lines
         text = self.preview.get('1.0', tk.END).strip()
         return [line.strip() for line in text.splitlines() if line.strip()]
-        
+
     def get_raw_text(self):
         return self.text.get('1.0', tk.END).strip()
 
@@ -180,7 +187,7 @@ class WhiteBedInput(ttk.Frame):
         hdr.pack(fill=tk.X)
         ttk.Label(
             hdr,
-            text="⬜ WHITE BED (Single line) - Font: FM SANDHYANEE 48pt | Color: Black"
+            text="⬜ WHITE BED (Multi-line) - Font: FM SANDHYANEE 48pt | Color: Black"
         ).pack(side=tk.LEFT, padx=5, pady=2)
 
         self.lang_btn = ttk.Button(
@@ -188,18 +195,32 @@ class WhiteBedInput(ttk.Frame):
         )
         self.lang_btn.pack(side=tk.RIGHT, padx=5)
 
-        self.entry = tk.Entry(self, font=("Arial", 12), width=60)
-        self.entry.pack(fill=tk.X, padx=5, pady=5)
-        self.entry.bind('<KeyRelease>', self.on_change)
+        # Input text area (Singlish)
+        text_frame = ttk.Frame(self)
+        self.text = tk.Text(text_frame, font=("Arial", 11), height=5, width=60, wrap=tk.WORD)
+        scrollbar = ttk.Scrollbar(text_frame, command=self.text.yview)
+        self.text.config(yscrollcommand=scrollbar.set)
+        self.text.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        text_frame.pack(fill=tk.BOTH, expand=True, padx=5, pady=2)
 
-        self.preview_label = tk.Label(
-            self, font=("Iskoola Pota", 13), anchor=tk.W, justify=tk.LEFT,
-            bg='white', fg='black'
+        self.text.bind('<KeyRelease>', self.on_change)
+        self.text.bind('<ButtonRelease-1>', self.on_change)
+
+        # Converted Preview area (Unicode text)
+        preview_frame = ttk.Frame(self)
+        self.preview = tk.Text(
+            preview_frame, font=("Iskoola Pota", 12), height=5, width=60,
+            wrap=tk.WORD, bg='lightyellow', state=tk.DISABLED
         )
-        self.preview_label.pack(fill=tk.X, padx=5, pady=2)
+        preview_scroll = ttk.Scrollbar(preview_frame, command=self.preview.yview)
+        self.preview.config(yscrollcommand=preview_scroll.set)
+        self.preview.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        preview_scroll.pack(side=tk.RIGHT, fill=tk.Y)
+        preview_frame.pack(fill=tk.BOTH, expand=True, padx=5, pady=2)
 
-        self.word_label = ttk.Label(self, text="0 words")
-        self.word_label.pack(anchor=tk.W, padx=5)
+        self.line_label = ttk.Label(self, text="0 lines")
+        self.line_label.pack(anchor=tk.W, padx=5)
 
     def toggle_language(self):
         self.sinhala_mode.set(not self.sinhala_mode.get())
@@ -210,27 +231,39 @@ class WhiteBedInput(ttk.Frame):
         self.on_change()
 
     def on_change(self, event=None):
-        raw_text = self.entry.get()
-        converted = convert_text(raw_text) if self.sinhala_mode.get() else raw_text
-        self.preview_label.config(text=converted)
+        raw_text = self.text.get('1.0', tk.END).strip()
 
-        words = len(converted.split())
-        color = "red" if words > 15 else "black"
-        warn  = " ⚠️ (max: 15)" if words > 15 else ""
-        self.word_label.config(text=f"{words} words{warn}", foreground=color)
+        if self.sinhala_mode.get():
+            lines = raw_text.splitlines()
+            converted_lines = [convert_text(line) for line in lines]
+            converted = '\n'.join(converted_lines)
+        else:
+            converted = raw_text
+
+        self.preview.config(state=tk.NORMAL)
+        self.preview.delete('1.0', tk.END)
+        self.preview.insert('1.0', converted)
+        self.preview.config(state=tk.DISABLED)
+
+        num_lines = len([l for l in converted.splitlines() if l.strip()])
+        self.line_label.config(text=f"{num_lines} lines")
+
+        if hasattr(self.app, '_on_white_text_change'):
+            self.app._on_white_text_change()
         if hasattr(self.app, 'schedule_preview_update'):
             self.app.schedule_preview_update()
 
-    def get_text(self):
-        """Returns the fully converted text for rendering."""
-        return self.preview_label.cget('text')
-        
+    def get_lines(self):
+        """Returns list of converted Unicode lines from preview widget."""
+        text = self.preview.get('1.0', tk.END).strip()
+        return [line.strip() for line in text.splitlines() if line.strip()]
+
     def get_raw_text(self):
-        return self.entry.get()
+        return self.text.get('1.0', tk.END).strip()
 
     def set_text(self, text):
-        self.entry.delete(0, tk.END)
-        self.entry.insert(0, text)
+        self.text.delete('1.0', tk.END)
+        self.text.insert('1.0', text)
         self.on_change()
 
 
@@ -435,8 +468,8 @@ class MainWindow(tk.Tk):
         ttk.Label(parent, text="🎨  LIVE PREVIEW", font=("Arial", 11, "bold")).pack(anchor=tk.W, padx=6, pady=(4, 0))
         self.preview_panel = PreviewPanel(parent, self.template_mgr)
         self.preview_panel.pack(fill=tk.BOTH, expand=True, padx=6, pady=4)
-        # Wire TAG selector → live re-render
         self.preview_panel.on_tag_select_callback = self.schedule_preview_update
+        self.preview_panel.on_white_select_callback = self.schedule_preview_update
 
     def _on_tab_change(self, _event):
         try:
@@ -503,14 +536,11 @@ class MainWindow(tk.Tk):
 
     def get_tag_lines_for_rendering(self):
         if hasattr(self, 'tag_input'):
-            text = self.tag_input.preview.get('1.0', tk.END).strip()
-            if isinstance(text, bytes):
-                text = text.decode('utf-8')
-            text = str(text)
-            lines = [line.strip() for line in text.split('\n') if line.strip()]
-            
+            preserve_empty = (self.current_template == 'SUB_TAG')
+            lines = self.tag_input.get_lines(preserve_empty=preserve_empty)
+
             print(f"\n[GET TAG LINES]")
-            print(f"  Total lines: {len(lines)}")
+            print(f"  Total lines: {len(lines)} (preserve_empty={preserve_empty})")
             for i, line in enumerate(lines[:3]):
                 print(f"  Line {i+1}: '{line[:50]}...'")
             return lines
@@ -518,20 +548,24 @@ class MainWindow(tk.Tk):
 
     def get_white_text_for_rendering(self):
         if hasattr(self, 'white_input'):
-            text = self.white_input.preview_label.cget('text')
-            if isinstance(text, bytes):
-                text = text.decode('utf-8')
-            text = str(text).strip()
-            
-            print(f"\n[GET WHITE TEXT]")
-            print(f"  Type: {type(text)}")
-            print(f"  Sample: '{text[:50]}...'")
-            return text
+            lines = self.white_input.get_lines()
+            if not lines:
+                return ""
+            idx = getattr(self.preview_panel, 'selected_white_index', 0)
+            idx = max(0, min(idx, len(lines) - 1))
+            return lines[idx]
         return ""
 
     def _on_tag_text_change(self):
-        tag_lines = self.tag_input.get_lines()
+        preserve_empty = (self.current_template == 'SUB_TAG')
+        tag_lines = self.tag_input.get_lines(preserve_empty=preserve_empty)
         self.gen_panel.update_tag_lines(tag_lines)
+        self._push_text_labels()
+
+    def _on_white_text_change(self):
+        white_lines = self.white_input.get_lines()
+        self.gen_panel.update_white_lines(white_lines)
+        self.preview_panel.update_white_selector(white_lines)
         self._push_text_labels()
         
     def schedule_preview_update(self):
@@ -560,16 +594,19 @@ class MainWindow(tk.Tk):
             letter_spacing = self.adjustments.get('letter_spacing', 0)
 
             # Get converted TAG lines from preview widget (correct Unicode)
-            tag_lines = self.tag_input.get_lines() if hasattr(self, 'tag_input') else []
+            preserve_empty = (template_type == 'SUB_TAG')
+            tag_lines = self.tag_input.get_lines(preserve_empty=preserve_empty) if hasattr(self, 'tag_input') else []
 
             # Update the TAG selector dropdown list
             if template_type == 'SUB_TAG':
-                # Show pairs in the selector
-                pairs = []
+                # Show pairs in the selector (skip pairs where both lines are empty)
+                pair_lines = []  # list of (l1_full, l2_full)
                 for p in range(0, len(tag_lines), 2):
-                    l1 = tag_lines[p][:25] if p < len(tag_lines) else ''
-                    l2 = tag_lines[p+1][:25] if p+1 < len(tag_lines) else ''
-                    pairs.append(f"Pair {len(pairs)+1}: {l1}...")
+                    l1 = tag_lines[p] if p < len(tag_lines) else ''
+                    l2 = tag_lines[p+1] if p+1 < len(tag_lines) else ''
+                    if l1 or l2:
+                        pair_lines.append((l1, l2))
+                pairs = [f"Pair {i+1}: {(l1 or l2)[:25]}..." for i, (l1, l2) in enumerate(pair_lines)]
                 self.preview_panel.tag_selector['values'] = pairs
                 if pairs:
                     idx = self.preview_panel.selected_tag_index
@@ -609,15 +646,12 @@ class MainWindow(tk.Tk):
             
             # TAG BED — show the selected tag/pair in the dropdown
             if template_type == 'SUB_TAG':
-                # SUB_TAG: render 2 lines per pair
-                pair_count = (len(tag_lines) + 1) // 2
-                if tag_lines and 0 <= selected_index < pair_count:
+                # SUB_TAG: render 2 lines per pair (using the same filtered pair list as the dropdown)
+                if pair_lines and 0 <= selected_index < len(pair_lines):
                     try:
                         bed_config = get_bed('TAG_BED')
                         if bed_config:
-                            s = selected_index * 2
-                            l1 = tag_lines[s] if s < len(tag_lines) else ''
-                            l2 = tag_lines[s+1] if s+1 < len(tag_lines) else ''
+                            l1, l2 = pair_lines[selected_index]
                             tag_img = renderer.render_sub_tag_bed_text(
                                 l1, l2, bed_config, h_scale, letter_spacing)
                             preview_img = Image.alpha_composite(preview_img, tag_img.convert('RGBA'))
@@ -637,6 +671,8 @@ class MainWindow(tk.Tk):
             
             # WHITE BED — MAIN TAG only
             if template_type == 'MAIN_TAG':
+                white_lines_all = self.white_input.get_lines() if hasattr(self, 'white_input') else []
+                self.preview_panel.update_white_selector(white_lines_all)
                 white_text = self.get_white_text_for_rendering()
                 if white_text:
                     try:
@@ -658,13 +694,12 @@ class MainWindow(tk.Tk):
         """Returns exact converted text for PNG generation."""
         topic = self.get_topic_text_for_rendering()
         tags  = self.get_tag_lines_for_rendering()
-        white = self.get_white_text_for_rendering() if self.current_template == "MAIN_TAG" else ""
-        return topic, tags, white
+        white_lines = self.white_input.get_lines() if self.current_template == "MAIN_TAG" and hasattr(self, 'white_input') else []
+        return topic, tags, white_lines
 
     def _push_text_labels(self):
         topic = self.get_topic_text_for_rendering()
-        white = self.get_white_text_for_rendering() if self.current_template == "MAIN_TAG" else ""
-        self.gen_panel.update_text_labels(topic, white)
+        self.gen_panel.update_text_labels(topic)
 
     def _on_session_selected(self, event=None):
         selected_session = self.session_var.get()
@@ -691,7 +726,10 @@ class MainWindow(tk.Tk):
             if "white_bed_raw" in content:
                 self.white_input.set_text(content.get("white_bed_raw", ""))
             else:
-                self.white_input.set_text(content.get("white_bed", ""))
+                wb = content.get("white_bed", "")
+                if isinstance(wb, list):
+                    wb = "\n".join(wb)
+                self.white_input.set_text(wb)
             
             template_type = draft.get("template_type", "MAIN_TAG")
             if template_type == "MAIN_TAG":
@@ -736,9 +774,9 @@ class MainWindow(tk.Tk):
             "session_name":   self.session_var.get(),
             "template_type":  self.current_template,
             "content": {
-                "topic_bed": self.topic_input.get_text(), 
-                "tag_lines": self.tag_input.get_lines(), 
-                "white_bed": self.white_input.get_text(),
+                "topic_bed": self.topic_input.get_text(),
+                "tag_lines": self.tag_input.get_lines(),
+                "white_bed": self.white_input.get_lines(),
                 "topic_bed_raw": self.topic_input.get_raw_text(),
                 "tag_lines_raw": self.tag_input.get_raw_text(),
                 "white_bed_raw": self.white_input.get_raw_text(),

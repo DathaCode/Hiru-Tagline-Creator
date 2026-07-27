@@ -1,0 +1,1535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>HiruNews AI Streamline — Product Brochure — SLASSCOM SNIA 2026</title>
+<style>
+
+/* ═══════════════════════════════════════════
+   RESET & BASE
+═══════════════════════════════════════════ */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --red:        #a70003;
+  --dark-red:   #7a0002;
+  --dark:       #0A0A0B;
+  --dark-card:  #131316;
+  --dark-row:   #1C1C21;
+  --gold:       #d4a017;
+  --gold-light: #f0c84a;
+  --white:      #ffffff;
+  --off-white:  #faf6f1;
+  --text:       #1c1c1c;
+  --text-light: #555555;
+  --text-muted: #A1A1AA;
+  --border:     #e0d0c8;
+  --border-dark:#27272F;
+  --success:    #10B981;
+}
+
+html, body {
+  font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+  color: var(--text);
+  background: white;
+  font-size: 10pt;
+  line-height: 1.4;
+}
+
+/* ═══════════════════════════════════════════
+   PAGE SETUP
+═══════════════════════════════════════════ */
+@page {
+  size: A4;
+  margin: 0;
+}
+
+.page {
+  width: 210mm;
+  min-height: 297mm;
+  height: 297mm;
+  position: relative;
+  overflow: hidden;
+  page-break-after: always;
+  break-after: page;
+  background: white;
+}
+
+.page:last-child {
+  page-break-after: avoid;
+  break-after: avoid;
+}
+
+.page-num {
+  position: absolute;
+  bottom: 8mm;
+  right: 12mm;
+  font-size: 7pt;
+  color: #aaa;
+  letter-spacing: 0.5px;
+}
+
+/* ═══════════════════════════════════════════
+   SHARED COMPONENTS
+═══════════════════════════════════════════ */
+.page-header-bar {
+  background: var(--dark);
+  height: 13mm;
+  display: flex;
+  align-items: center;
+  padding: 0 13mm;
+  gap: 4mm;
+}
+
+.page-header-bar .bar-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--gold);
+  flex-shrink: 0;
+}
+
+.page-header-bar h2 {
+  color: white;
+  font-size: 10.5pt;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+}
+
+.page-header-bar .bar-spacer { flex: 1; }
+
+.page-header-bar .bar-tag {
+  font-size: 6.5pt;
+  color: rgba(255,255,255,0.45);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.gold-rule {
+  height: 3px;
+  background: var(--gold);
+  width: 100%;
+}
+
+.section-label {
+  font-size: 7pt;
+  font-weight: 700;
+  color: var(--red);
+  text-transform: uppercase;
+  letter-spacing: 1.8px;
+  margin-bottom: 3mm;
+  padding-bottom: 1.5mm;
+  border-bottom: 2px solid var(--gold);
+  display: inline-block;
+}
+
+
+/* ═══════════════════════════════════════════
+   PAGE 1 — COVER
+═══════════════════════════════════════════ */
+#page1 { background: var(--off-white); }
+
+.cover-header {
+  background: var(--red);
+  height: 82mm;
+  position: relative;
+  padding: 10mm 13mm 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.cover-header::before {
+  content: '';
+  position: absolute;
+  top: 0; right: 0; bottom: 0;
+  width: 55%;
+  background: repeating-linear-gradient(
+    -50deg,
+    transparent,
+    transparent 9px,
+    rgba(255,255,255,0.035) 9px,
+    rgba(255,255,255,0.035) 18px
+  );
+  pointer-events: none;
+}
+
+.cover-header::after {
+  content: '';
+  position: absolute;
+  bottom: 0; right: 0;
+  width: 0; height: 0;
+  border-style: solid;
+  border-width: 0 0 24mm 40mm;
+  border-color: transparent transparent var(--dark-red) transparent;
+}
+
+.cover-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 5mm;
+  position: relative;
+  z-index: 2;
+}
+
+.cover-eyebrow-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--gold);
+  flex-shrink: 0;
+}
+
+.cover-eyebrow-text {
+  font-size: 7pt;
+  color: rgba(255,255,255,0.75);
+  letter-spacing: 2.2px;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+.cover-product-name {
+  color: white;
+  font-size: 28pt;
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.5px;
+  position: relative;
+  z-index: 2;
+  margin-bottom: 2mm;
+}
+
+.cover-subtitle {
+  color: rgba(255,255,255,0.88);
+  font-size: 10.5pt;
+  font-weight: 400;
+  letter-spacing: 0.2px;
+  position: relative;
+  z-index: 2;
+  margin-bottom: 8mm;
+}
+
+.cover-gold-bar {
+  height: 4mm;
+  background: var(--gold);
+  position: relative;
+}
+
+.cover-gold-bar::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 60mm;
+  height: 100%;
+  background: var(--dark);
+}
+
+/* Cover body */
+.cover-body {
+  padding: 5mm 13mm 4mm;
+}
+
+.cover-award-badge {
+  display: inline-block;
+  background: var(--dark);
+  color: var(--gold);
+  font-size: 7.5pt;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  padding: 2.5mm 5mm;
+  border-left: 3px solid var(--gold);
+  margin-bottom: 4mm;
+}
+
+.cover-hook {
+  font-size: 12pt;
+  font-weight: 600;
+  color: var(--dark);
+  line-height: 1.45;
+  border-left: 4px solid var(--red);
+  padding: 2mm 0 2mm 5mm;
+  margin-bottom: 5mm;
+}
+
+/* Two-module intro */
+.modules-intro {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3mm;
+  margin-bottom: 4mm;
+}
+
+.module-card {
+  border: 1.5px solid var(--border);
+  border-radius: 6px;
+  padding: 3.5mm 4mm;
+  position: relative;
+  overflow: hidden;
+}
+
+.module-card::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+}
+
+.module-card.mod1::before { background: var(--red); }
+.module-card.mod2::before { background: var(--gold); }
+
+.module-card.mod1 { background: #fff8f8; }
+.module-card.mod2 { background: #fffcf5; }
+
+.module-tag {
+  font-size: 6pt;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 1.5mm;
+}
+
+.mod1 .module-tag { color: var(--red); }
+.mod2 .module-tag { color: var(--gold); }
+
+.module-name {
+  font-size: 9pt;
+  font-weight: 700;
+  color: var(--dark);
+  margin-bottom: 1.5mm;
+}
+
+.module-desc {
+  font-size: 7pt;
+  color: var(--text-light);
+  line-height: 1.45;
+}
+
+/* Cover meta */
+.cover-meta-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 2.5mm;
+  margin-bottom: 4mm;
+}
+
+.cover-meta-card {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 2.5mm 3.5mm;
+  border-top: 2px solid var(--red);
+}
+
+.meta-label {
+  font-size: 6pt;
+  font-weight: 700;
+  color: var(--red);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 1mm;
+}
+
+.meta-value {
+  font-size: 7.5pt;
+  color: var(--dark);
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+/* Target users */
+.target-strip {
+  background: var(--dark);
+  margin: 0 -13mm;
+  padding: 3.5mm 13mm;
+  display: flex;
+  align-items: center;
+  gap: 3mm;
+}
+
+.target-label {
+  font-size: 6.5pt;
+  font-weight: 700;
+  color: var(--gold);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  flex-shrink: 0;
+}
+
+.target-pill {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(212,160,23,0.4);
+  color: rgba(255,255,255,0.88);
+  font-size: 7pt;
+  font-weight: 500;
+  padding: 1mm 3.5mm;
+  border-radius: 20px;
+}
+
+.cover-footer-strip {
+  margin-top: 3mm;
+  border-top: 1.5px solid var(--gold);
+  padding-top: 3mm;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.cover-urls {
+  font-size: 7pt;
+  color: var(--text-light);
+}
+
+.cover-urls span {
+  color: var(--red);
+  font-weight: 600;
+  margin-right: 5mm;
+}
+
+.cover-tagline {
+  font-size: 6.5pt;
+  color: #999;
+  font-style: italic;
+}
+
+
+/* ═══════════════════════════════════════════
+   PAGE 2 — PROBLEM & SOLUTION
+═══════════════════════════════════════════ */
+#page2 { background: white; }
+
+/* Problem section */
+.problem-section {
+  padding: 5mm 13mm 3mm;
+}
+
+.problem-header {
+  display: flex;
+  align-items: center;
+  gap: 3mm;
+  margin-bottom: 3mm;
+}
+
+.problem-icon {
+  font-size: 18pt;
+  line-height: 1;
+}
+
+.problem-title {
+  font-size: 11pt;
+  font-weight: 700;
+  color: var(--dark);
+}
+
+.problem-body {
+  font-size: 8pt;
+  color: var(--text);
+  line-height: 1.55;
+  margin-bottom: 3mm;
+  border-left: 3px solid var(--red);
+  padding-left: 4mm;
+}
+
+.pain-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 2.5mm;
+  margin-bottom: 2mm;
+}
+
+.pain-card {
+  background: #fff5f5;
+  border-radius: 5px;
+  padding: 2.5mm 3mm;
+  text-align: center;
+  border: 1px solid #fde0e0;
+}
+
+.pain-num {
+  font-size: 16pt;
+  font-weight: 900;
+  color: var(--red);
+  line-height: 1.1;
+}
+
+.pain-lbl {
+  font-size: 6pt;
+  font-weight: 600;
+  color: var(--text-light);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 1mm;
+}
+
+/* Solution section */
+.solution-section {
+  padding: 3mm 13mm 2mm;
+}
+
+.solution-header {
+  display: flex;
+  align-items: center;
+  gap: 3mm;
+  margin-bottom: 3mm;
+}
+
+.solution-title {
+  font-size: 11pt;
+  font-weight: 700;
+  color: var(--dark);
+}
+
+.solution-body {
+  font-size: 8pt;
+  color: var(--text);
+  line-height: 1.55;
+  margin-bottom: 4mm;
+  border-left: 3px solid var(--success);
+  padding-left: 4mm;
+}
+
+/* Workflow — full pipeline */
+.workflow-section {
+  background: var(--dark);
+  padding: 4mm 13mm 3mm;
+}
+
+.workflow-title {
+  font-size: 6.5pt;
+  font-weight: 700;
+  color: var(--gold);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 3mm;
+}
+
+.workflow-pipeline {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  margin-bottom: 3mm;
+}
+
+.wf-module-group {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  flex: 1;
+  position: relative;
+}
+
+.wf-module-label {
+  position: absolute;
+  top: -3mm;
+  font-size: 5.5pt;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+}
+
+.wf-module-label.mod1-label {
+  left: 0;
+  color: var(--red);
+}
+
+.wf-module-label.mod2-label {
+  right: 0;
+  color: var(--gold);
+}
+
+.wf-step {
+  background: var(--dark-card);
+  border: 1px solid var(--border-dark);
+  border-radius: 5px;
+  padding: 2.5mm 2mm;
+  text-align: center;
+  flex: 1;
+  min-width: 0;
+}
+
+.wf-step.active-step {
+  border-color: var(--red);
+  background: rgba(167, 0, 3, 0.15);
+}
+
+.wf-step.gold-step {
+  border-color: var(--gold);
+  background: rgba(212, 160, 23, 0.1);
+}
+
+.wf-icon {
+  font-size: 11pt;
+  display: block;
+  line-height: 1;
+  margin-bottom: 1mm;
+}
+
+.wf-label {
+  font-size: 5.5pt;
+  font-weight: 600;
+  color: rgba(255,255,255,0.85);
+  line-height: 1.25;
+}
+
+.wf-arrow {
+  color: var(--gold);
+  font-size: 13pt;
+  font-weight: 700;
+  flex-shrink: 0;
+  padding: 0 1mm;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+}
+
+.wf-divider {
+  width: 2px;
+  background: var(--gold);
+  margin: 0 2mm;
+  flex-shrink: 0;
+  border-radius: 1px;
+}
+
+/* Metrics strip */
+.metrics-strip {
+  background: var(--dark-card);
+  display: flex;
+  align-items: stretch;
+  padding: 3.5mm 13mm;
+  gap: 3mm;
+  border-top: 2px solid var(--gold);
+}
+
+.metric-box {
+  background: var(--gold);
+  border-radius: 5px;
+  padding: 3mm 4mm;
+  text-align: center;
+  flex: 1;
+}
+
+.metric-num {
+  display: block;
+  font-size: 18pt;
+  font-weight: 900;
+  color: var(--dark);
+  line-height: 1;
+  margin-bottom: 1mm;
+  letter-spacing: -0.5px;
+}
+
+.metric-lbl {
+  display: block;
+  font-size: 6pt;
+  font-weight: 700;
+  color: var(--dark);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+/* Before/After */
+.before-after {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+}
+
+.ba-col {
+  padding: 4mm 6mm 3mm;
+}
+
+.ba-col.before {
+  background: #fef5f5;
+  border-right: 2px solid var(--gold);
+}
+
+.ba-col.after {
+  background: #f5fef8;
+}
+
+.ba-heading {
+  font-size: 7.5pt;
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 2.5mm;
+}
+
+.before .ba-heading { color: var(--red); }
+.after  .ba-heading { color: var(--success); }
+
+.ba-col ul {
+  list-style: none;
+}
+
+.ba-col li {
+  font-size: 7pt;
+  padding: 1.2mm 0 1.2mm 5mm;
+  position: relative;
+  line-height: 1.35;
+  border-bottom: 1px solid rgba(0,0,0,0.04);
+}
+
+.before li::before {
+  content: '✕';
+  position: absolute;
+  left: 0;
+  color: var(--red);
+  font-size: 6.5pt;
+  top: 1.5mm;
+  font-weight: 700;
+}
+
+.after li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: var(--success);
+  font-size: 7pt;
+  top: 1mm;
+  font-weight: 800;
+}
+
+
+/* ═══════════════════════════════════════════
+   PAGE 3 — CORE FEATURES (BOTH MODULES)
+═══════════════════════════════════════════ */
+#page3 { background: white; }
+
+.features-area {
+  padding: 4mm 13mm 2mm;
+}
+
+.module-section-header {
+  display: flex;
+  align-items: center;
+  gap: 3mm;
+  margin-bottom: 2.5mm;
+  padding-bottom: 1.5mm;
+  border-bottom: 2px solid;
+}
+
+.module-section-header.mod1-header { border-bottom-color: var(--red); }
+.module-section-header.mod2-header { border-bottom-color: var(--gold); margin-top: 3mm; }
+
+.module-section-tag {
+  font-size: 6pt;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  padding: 1mm 3mm;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.mod1-header .module-section-tag {
+  background: var(--red);
+  color: white;
+}
+
+.mod2-header .module-section-tag {
+  background: var(--gold);
+  color: var(--dark);
+}
+
+.module-section-name {
+  font-size: 9pt;
+  font-weight: 700;
+  color: var(--dark);
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2.5mm;
+}
+
+.feat-card {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 3mm 4mm 3mm 5mm;
+  position: relative;
+  overflow: hidden;
+}
+
+.feat-card::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+}
+
+.feat-card.red-accent::before { background: var(--red); }
+.feat-card.gold-accent::before { background: var(--gold); }
+
+.feat-icon {
+  font-size: 13pt;
+  display: inline-block;
+  margin-bottom: 1mm;
+  line-height: 1;
+}
+
+.feat-title {
+  font-size: 8pt;
+  font-weight: 700;
+  color: var(--dark);
+  margin-bottom: 1mm;
+}
+
+.feat-desc {
+  font-size: 6.5pt;
+  color: var(--text-light);
+  line-height: 1.5;
+}
+
+/* Tech stack bar */
+.tech-bar {
+  background: var(--dark);
+  padding: 3.5mm 13mm;
+  display: flex;
+  align-items: center;
+  gap: 2.5mm;
+  flex-wrap: wrap;
+}
+
+.tech-bar-label {
+  font-size: 6.5pt;
+  font-weight: 700;
+  color: var(--gold);
+  text-transform: uppercase;
+  letter-spacing: 1.8px;
+  flex-shrink: 0;
+  margin-right: 2mm;
+}
+
+.tech-pill {
+  background: rgba(255,255,255,0.09);
+  border: 1px solid rgba(212,160,23,0.45);
+  color: rgba(255,255,255,0.90);
+  font-size: 6.5pt;
+  font-weight: 500;
+  padding: 0.8mm 3mm;
+  border-radius: 20px;
+}
+
+/* Ethics panel */
+.ethics-panel {
+  margin: 3mm 13mm 0;
+  border: 1.5px solid var(--red);
+  border-radius: 6px;
+  padding: 3.5mm 5mm 3mm;
+  background: #fff8f8;
+  position: relative;
+}
+
+.ethics-heading {
+  font-size: 6.5pt;
+  font-weight: 700;
+  color: var(--red);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  background: #fff8f8;
+  position: absolute;
+  top: -2.5mm;
+  left: 5mm;
+  padding: 0 2mm;
+}
+
+.ethics-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2mm;
+  margin-top: 1mm;
+}
+
+.etag {
+  background: var(--red);
+  color: white;
+  font-size: 6pt;
+  font-weight: 600;
+  padding: 0.8mm 2.5mm;
+  border-radius: 3px;
+}
+
+/* Engineering note */
+.eng-note {
+  margin: 3mm 13mm 0;
+  background: var(--off-white);
+  border-left: 3px solid var(--gold);
+  padding: 2.5mm 4mm;
+  font-size: 7pt;
+  color: var(--text-light);
+  line-height: 1.5;
+}
+
+.eng-note strong {
+  color: var(--dark);
+}
+
+
+/* ═══════════════════════════════════════════
+   PAGE 4 — BENEFITS, IMPACT & FUTURE
+═══════════════════════════════════════════ */
+#page4 {
+  background: white;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Benefits section */
+.benefits-section {
+  padding: 4mm 13mm 2mm;
+}
+
+.benefits-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 2.5mm;
+  margin-top: 2mm;
+}
+
+.benefit-card {
+  background: #f8fafb;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 3mm 3.5mm;
+  text-align: center;
+  border-top: 2.5px solid var(--red);
+}
+
+.benefit-icon {
+  font-size: 16pt;
+  display: block;
+  line-height: 1;
+  margin-bottom: 1.5mm;
+}
+
+.benefit-title {
+  font-size: 7.5pt;
+  font-weight: 700;
+  color: var(--dark);
+  margin-bottom: 1mm;
+}
+
+.benefit-desc {
+  font-size: 6.5pt;
+  color: var(--text-light);
+  line-height: 1.45;
+}
+
+/* Impact section */
+.impact-section {
+  padding: 3mm 13mm 2mm;
+}
+
+.impact-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2.5mm;
+  margin-top: 2mm;
+}
+
+.impact-card {
+  background: #fff8f8;
+  border-left: 3px solid var(--red);
+  border-radius: 0 5px 5px 0;
+  padding: 3mm 4mm;
+}
+
+.impact-card strong {
+  display: block;
+  font-size: 7.5pt;
+  color: var(--dark);
+  font-weight: 700;
+  margin-bottom: 1mm;
+}
+
+.impact-card p {
+  font-size: 6.5pt;
+  color: var(--text-light);
+  line-height: 1.45;
+}
+
+/* Awards */
+.awards-section {
+  padding: 2mm 13mm;
+  background: #fafafa;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.award-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 6mm;
+  margin-top: 1.5mm;
+}
+
+.award-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 2mm;
+  padding: 1mm 0;
+  border-bottom: 1px solid #edddd0;
+  font-size: 6.5pt;
+}
+
+.award-yr {
+  color: var(--gold);
+  font-weight: 700;
+  font-size: 6pt;
+  flex-shrink: 0;
+  padding-top: 0.3mm;
+  min-width: 7mm;
+}
+
+.award-txt {
+  color: var(--text-light);
+  line-height: 1.3;
+}
+
+/* Future */
+.future-section {
+  padding: 2.5mm 13mm 2mm;
+}
+
+.future-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1mm 8mm;
+  margin-top: 1.5mm;
+}
+
+.future-item {
+  font-size: 7pt;
+  color: var(--text);
+  padding: 1.2mm 0 1.2mm 5mm;
+  position: relative;
+  border-bottom: 1px solid #f0e8e0;
+}
+
+.future-item::before {
+  content: '→';
+  position: absolute;
+  left: 0;
+  color: var(--gold);
+  font-weight: 700;
+  font-size: 8pt;
+}
+
+/* Footer */
+.p4-footer {
+  background: var(--dark);
+  margin-top: auto;
+  padding: 5mm 13mm;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.p4-footer-left .org-name {
+  color: var(--gold);
+  font-size: 8pt;
+  font-weight: 700;
+}
+
+.p4-footer-left .org-sub {
+  color: rgba(255,255,255,0.55);
+  font-size: 6.5pt;
+  margin-top: 1mm;
+}
+
+.p4-footer-right {
+  text-align: right;
+}
+
+.p4-footer-right .contact {
+  color: rgba(255,255,255,0.85);
+  font-size: 7.5pt;
+  font-weight: 500;
+}
+
+.p4-footer-right .urls {
+  color: rgba(255,255,255,0.45);
+  font-size: 6.5pt;
+  margin-top: 1mm;
+}
+
+.p4-footer-pagenum {
+  color: rgba(255,255,255,0.35);
+  font-size: 7pt;
+  align-self: flex-end;
+  margin-left: 6mm;
+}
+
+</style>
+</head>
+<body>
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     PAGE 1 — COVER
+═══════════════════════════════════════════════════════════ -->
+<div class="page" id="page1">
+
+  <div class="cover-header">
+    <div class="cover-eyebrow">
+      <div class="cover-eyebrow-dot"></div>
+      <span class="cover-eyebrow-text">Lotus Technologies (Pvt) Ltd &nbsp;·&nbsp; Asia Broadcasting Corporation</span>
+    </div>
+    <div class="cover-product-name">HiruNews AI Streamline</div>
+    <div class="cover-subtitle">AI-Powered End-to-End Broadcast News Production Pipeline</div>
+  </div>
+
+  <div class="cover-gold-bar"></div>
+
+  <div class="cover-body">
+    <div class="cover-award-badge">
+      SLASSCOM National Ingenuity Awards 2026 &nbsp;·&nbsp; Best Tech for Good Software Innovation
+    </div>
+
+    <div class="cover-hook">
+      One unified AI pipeline transforms raw press recordings into broadcast-ready Sinhala taglines — replacing a 35-person relay with a single-operator workflow, while keeping every editorial decision in human hands.
+    </div>
+
+    <!-- Two modules -->
+    <div class="modules-intro">
+      <div class="module-card mod1">
+        <div class="module-tag">Module 1 — AI Processing Engine</div>
+        <div class="module-name">HiruNews AI Streamline</div>
+        <div class="module-desc">Web-based AI companion that ingests raw audio, video, and press material. Performs speaker-diarized transcription, generates Sinhala taglines, and routes content through a mandatory senior editor approval workflow before broadcast.</div>
+      </div>
+      <div class="module-card mod2">
+        <div class="module-tag">Module 2 — Broadcast Graphics Engine</div>
+        <div class="module-name">HiruTaglineCreator v3.1</div>
+        <div class="module-desc">Production desktop application that receives approved taglines and renders pixel-perfect 1920×1080 transparent PNG overlays using a bespoke FM-font Sinhala typography pipeline. AI-powered layout intelligence auto-scales every glyph to the broadcast template.</div>
+      </div>
+    </div>
+
+    <!-- Key facts -->
+    <div class="cover-meta-row">
+      <div class="cover-meta-card">
+        <div class="meta-label">Developer</div>
+        <div class="meta-value">Mr. Vidath Dulanjith<br>DevOps Engineer</div>
+      </div>
+      <div class="cover-meta-card">
+        <div class="meta-label">Organisation</div>
+        <div class="meta-value">Lotus Technologies<br>(Pvt) Ltd</div>
+      </div>
+      <div class="cover-meta-card">
+        <div class="meta-label">Production Status</div>
+        <div class="meta-value">Live since<br>August 2025</div>
+      </div>
+      <div class="cover-meta-card">
+        <div class="meta-label">Proven in Crisis</div>
+        <div class="meta-value">Ditwa Cyclone<br>Nov–Dec 2025</div>
+      </div>
+    </div>
+
+    <!-- Target users -->
+    <div class="target-strip">
+      <span class="target-label">Target Users</span>
+      <span class="target-pill">News Editors &amp; Journalists</span>
+      <span class="target-pill">Graphics Operators</span>
+      <span class="target-pill">Broadcast Production Teams</span>
+      <span class="target-pill">TV News Channels</span>
+    </div>
+
+    <div class="cover-footer-strip">
+      <div class="cover-urls">
+        <span>asiabroadcasting.lk</span>
+        <span>hirunews.lk</span>
+        <span>hirutv.lk</span>
+      </div>
+      <div class="cover-tagline">Contact: vidath@lotustechnologies.lk</div>
+    </div>
+  </div>
+
+  <div class="page-num">1 of 4</div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     PAGE 2 — PROBLEM & SOLUTION
+═══════════════════════════════════════════════════════════ -->
+<div class="page" id="page2">
+
+  <div class="page-header-bar">
+    <div class="bar-dot"></div>
+    <h2>The Problem &amp; The Solution</h2>
+    <div class="bar-spacer"></div>
+    <span class="bar-tag">HiruNews AI Streamline</span>
+  </div>
+
+  <!-- Problem -->
+  <div class="problem-section">
+    <div class="section-label">The Problem</div>
+    <div class="problem-body">
+      Sri Lanka's leading television news broadcast, Hiru News, runs three live bulletins daily — at 11:55 AM, 6:55 PM, and 9:55 PM. Each bulletin contains approximately 20 news segments requiring up to 80 separate broadcast tagline PNGs. Before HiruNews AI Streamline, producing these taglines required a fully manual, multi-team relay: reporters submitted raw material; transcriptionists converted audio to text by hand; writers drafted Sinhala taglines; editors reviewed and returned corrections; a separate graphics team of 8 members created PNG overlays in design software; and completed assets were reviewed again before playout. Every handoff introduced delay. Every correction cycle consumed critical minutes — minutes that, during national emergencies like floods, cyclones, and landslides, could determine whether vulnerable Sri Lankan citizens received warnings before or after danger arrived.
+    </div>
+
+    <div class="pain-grid">
+      <div class="pain-card">
+        <div class="pain-num">35+</div>
+        <div class="pain-lbl">Staff Coordinated<br>Per Bulletin</div>
+      </div>
+      <div class="pain-card">
+        <div class="pain-num">8</div>
+        <div class="pain-lbl">Dedicated Graphics<br>Team Members</div>
+      </div>
+      <div class="pain-card">
+        <div class="pain-num">30+</div>
+        <div class="pain-lbl">Minutes Lost<br>Per Bulletin</div>
+      </div>
+      <div class="pain-card">
+        <div class="pain-num">80</div>
+        <div class="pain-lbl">Tagline PNGs<br>Per Bulletin (Peak)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Solution -->
+  <div class="solution-section">
+    <div class="section-label">The Solution — One Unified Pipeline</div>
+    <div class="solution-body">
+      HiruNews AI Streamline collapses the entire relay into a single AI-assisted production pipeline. Module 1 ingests raw press recordings, performs AI-powered transcription with speaker diarisation, and generates complete Sinhala tagline sets — all routed through a mandatory senior editor approval gate. Module 2 receives approved content and renders broadcast-ready PNG overlays using AI-powered layout intelligence that automatically scales, fits, and balances every Sinhala glyph to the template. One journalist now takes raw material from intake to broadcast-ready output — with no graphics team roundtrip — while editorial oversight remains intact at every stage. The AI suggests. The journalist decides. Nothing reaches the air without a human saying yes.
+    </div>
+  </div>
+
+  <!-- Workflow pipeline -->
+  <div class="workflow-section">
+    <div class="workflow-title">End-to-End Production Pipeline</div>
+    <div class="workflow-pipeline">
+      <!-- Module 1 steps -->
+      <div class="wf-step active-step">
+        <span class="wf-icon">📥</span>
+        <span class="wf-label">Upload<br>Source</span>
+      </div>
+      <div class="wf-arrow">›</div>
+      <div class="wf-step active-step">
+        <span class="wf-icon">🎙</span>
+        <span class="wf-label">AI<br>Transcription</span>
+      </div>
+      <div class="wf-arrow">›</div>
+      <div class="wf-step active-step">
+        <span class="wf-icon">✨</span>
+        <span class="wf-label">AI Tagline<br>Suggestions</span>
+      </div>
+      <div class="wf-arrow">›</div>
+      <div class="wf-step active-step">
+        <span class="wf-icon">✅</span>
+        <span class="wf-label">Editor<br>Review</span>
+      </div>
+
+      <div class="wf-divider"></div>
+
+      <!-- Module 2 steps -->
+      <div class="wf-step gold-step">
+        <span class="wf-icon">➡</span>
+        <span class="wf-label">Handoff<br>Export</span>
+      </div>
+      <div class="wf-arrow">›</div>
+      <div class="wf-step gold-step">
+        <span class="wf-icon">🖨</span>
+        <span class="wf-label">Tagline<br>Creator</span>
+      </div>
+      <div class="wf-arrow">›</div>
+      <div class="wf-step gold-step">
+        <span class="wf-icon">📺</span>
+        <span class="wf-label">Broadcast<br>Ready</span>
+      </div>
+    </div>
+    <div style="display: flex; gap: 3mm; font-size: 6pt; letter-spacing: 1px; text-transform: uppercase; font-weight: 600;">
+      <span style="color: var(--red); flex: 4;">◼ Module 1 — AI Processing &amp; Editorial Approval</span>
+      <span style="color: var(--gold); flex: 3; text-align: right;">◼ Module 2 — Broadcast Graphics Engine</span>
+    </div>
+  </div>
+
+  <!-- Metrics -->
+  <div class="metrics-strip">
+    <div class="metric-box">
+      <span class="metric-num">~68%</span>
+      <span class="metric-lbl">Overall Time Reduced</span>
+    </div>
+    <div class="metric-box">
+      <span class="metric-num">~45%</span>
+      <span class="metric-lbl">Cost Reduction</span>
+    </div>
+    <div class="metric-box">
+      <span class="metric-num">30+ min</span>
+      <span class="metric-lbl">Saved Per Bulletin</span>
+    </div>
+    <div class="metric-box">
+      <span class="metric-num">~90s</span>
+      <span class="metric-lbl">AI Generation Time</span>
+    </div>
+  </div>
+
+  <!-- Before/After -->
+  <div class="before-after">
+    <div class="ba-col before">
+      <div class="ba-heading">Before</div>
+      <ul>
+        <li>35+ staff coordinated per bulletin</li>
+        <li>8-member dedicated graphics team</li>
+        <li>Manual audio listening &amp; transcription</li>
+        <li>Manual Sinhala tagline drafting</li>
+        <li>Multiple news-desk ↔ graphics roundtrips</li>
+        <li>Slow emergency broadcast response</li>
+        <li>Error-prone at every manual handoff</li>
+      </ul>
+    </div>
+    <div class="ba-col after">
+      <div class="ba-heading">With AI Streamline</div>
+      <ul>
+        <li>Single-operator full pipeline</li>
+        <li>Zero graphics team roundtrip</li>
+        <li>AI-powered transcription &amp; diarisation</li>
+        <li>Auto-generated Sinhala taglines</li>
+        <li>One-click handoff to graphics engine</li>
+        <li>Battle-tested: Ditwa Cyclone response</li>
+        <li>Human-in-the-loop at every stage</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="page-num">2 of 4</div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     PAGE 3 — CORE FEATURES (BOTH MODULES)
+═══════════════════════════════════════════════════════════ -->
+<div class="page" id="page3">
+
+  <div class="page-header-bar">
+    <div class="bar-dot"></div>
+    <h2>Core Features — Both Modules</h2>
+    <div class="bar-spacer"></div>
+    <span class="bar-tag">HiruNews AI Streamline</span>
+  </div>
+
+  <div class="features-area">
+
+    <!-- Module 1 features -->
+    <div class="module-section-header mod1-header">
+      <span class="module-section-tag">Module 1</span>
+      <span class="module-section-name">AI News Processing Engine</span>
+    </div>
+
+    <div class="features-grid">
+      <div class="feat-card red-accent">
+        <span class="feat-icon">📡</span>
+        <div class="feat-title">Multi-Format Source Ingestion</div>
+        <div class="feat-desc">Accepts audio (MP3, WAV, M4A), video (MP4), and documents (TXT, DOC, PDF). Drop files directly into the web interface. Bulletin metadata — reporter, location, time slot, priority — tagged at upload.</div>
+      </div>
+
+      <div class="feat-card red-accent">
+        <span class="feat-icon">🎙</span>
+        <div class="feat-title">AI Transcription &amp; Speaker Diarisation</div>
+        <div class="feat-desc">Whisper-powered speech-to-text identifies every speaker, timestamp, and word in Sinhala. AI subbing engine corrects grammar and restores proper Sinhala spellings automatically.</div>
+      </div>
+
+      <div class="feat-card red-accent">
+        <span class="feat-icon">✨</span>
+        <div class="feat-title">AI Tagline Generation</div>
+        <div class="feat-desc">Generates 5 complete tagline sets — Topic Bed headlines, TAG lines, and White Bed text — all in Sinhala, all within exact broadcast word limits. Multiple AI suggestions with word-count validation per line.</div>
+      </div>
+
+      <div class="feat-card red-accent">
+        <span class="feat-icon">✅</span>
+        <div class="feat-title">Five-Gate Editorial Approval</div>
+        <div class="feat-desc">Facts verified. No defamatory content. Broadcasting standards met. Sinhala grammar reviewed. Source confidentiality preserved. Every gate requires human approval — no automated publishing.</div>
+      </div>
+    </div>
+
+    <!-- Module 2 features -->
+    <div class="module-section-header mod2-header">
+      <span class="module-section-tag">Module 2</span>
+      <span class="module-section-name">Broadcast Graphics Engine — HiruTaglineCreator v3.1</span>
+    </div>
+
+    <div class="features-grid">
+      <div class="feat-card gold-accent">
+        <span class="feat-icon">🔤</span>
+        <div class="feat-title">FM-Font Sinhala Typography Pipeline</div>
+        <div class="feat-desc">762-line deterministic converter: Singlish → Sinhala Unicode → FM ASCII. Handles rakaransaya, yansaya, ර්‍ය conjuncts, word-level exceptions, and Latin PUA with HarfBuzz shaping.</div>
+      </div>
+
+      <div class="feat-card gold-accent">
+        <span class="feat-icon">🤖</span>
+        <div class="feat-title">AI-Powered Layout Intelligence</div>
+        <div class="feat-desc">Every tagline is automatically scaled, fitted, and balanced to the broadcast template — no manual adjustments, no broken kerning, no overflow. The AI reads the canvas and places every glyph precisely.</div>
+      </div>
+
+      <div class="feat-card gold-accent">
+        <span class="feat-icon">👁</span>
+        <div class="feat-title">Live Visual Preview</div>
+        <div class="feat-desc">Real-time broadcast-quality rendering preview. Selected TAG lines cycle through the live canvas. What you see is exactly what goes to broadcast — WYSIWYG at 1920×1080 resolution.</div>
+      </div>
+
+      <div class="feat-card gold-accent">
+        <span class="feat-icon">🖨</span>
+        <div class="feat-title">Selective PNG Generation</div>
+        <div class="feat-desc">Choose individual taglines or batch-generate all. Each PNG is numbered, named, and sequenced for playout. Dual templates — MAIN TAG and SUB TAG — with transparent 1920×1080 overlays.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tech stack -->
+  <div class="tech-bar">
+    <span class="tech-bar-label">Tech Stack</span>
+    <span class="tech-pill">React 18</span>
+    <span class="tech-pill">Python / Tkinter</span>
+    <span class="tech-pill">Pillow</span>
+    <span class="tech-pill">HarfBuzz</span>
+    <span class="tech-pill">Gemini Pro</span>
+    <span class="tech-pill">OpenAI API</span>
+    <span class="tech-pill">Whisper STT</span>
+    <span class="tech-pill">Speaker Diarisation</span>
+    <span class="tech-pill">PyInstaller</span>
+    <span class="tech-pill">Claude Code</span>
+  </div>
+
+  <!-- Ethics -->
+  <div class="ethics-panel">
+    <span class="ethics-heading">Responsible AI — Human-in-the-Loop Design</span>
+    <div class="ethics-tags">
+      <span class="etag">Human Approval Mandatory</span>
+      <span class="etag">PII Protected</span>
+      <span class="etag">Confidential Sources Safeguarded</span>
+      <span class="etag">No Automated Publishing</span>
+      <span class="etag">Editorial Standards Maintained</span>
+      <span class="etag">AI Suggests — Journalist Decides</span>
+    </div>
+  </div>
+
+  <!-- Engineering note -->
+  <div class="eng-note">
+    <strong>Built by:</strong> Entire system designed, architected, and built by Mr. Vidath Dulanjith, DevOps Engineer at Lotus Technologies, using agentic AI-assisted development with Claude Code — demonstrating that a single engineer with AI tools can deliver broadcast-grade production software for linguistically underserved markets.
+  </div>
+
+  <div class="page-num">3 of 4</div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     PAGE 4 — BENEFITS, IMPACT & FUTURE
+═══════════════════════════════════════════════════════════ -->
+<div class="page" id="page4">
+
+  <div class="page-header-bar">
+    <div class="bar-dot"></div>
+    <h2>Benefits, Social Impact &amp; Future</h2>
+    <div class="bar-spacer"></div>
+    <span class="bar-tag">HiruNews AI Streamline</span>
+  </div>
+
+  <!-- Benefits -->
+  <div class="benefits-section">
+    <div class="section-label">Key Benefits</div>
+    <div class="benefits-grid">
+      <div class="benefit-card">
+        <span class="benefit-icon">⚡</span>
+        <div class="benefit-title">Speed</div>
+        <div class="benefit-desc">30+ minutes saved per bulletin. 5 complete tagline sets generated in under 90 seconds. Three daily bulletins accelerated — every day, including during emergencies.</div>
+      </div>
+      <div class="benefit-card">
+        <span class="benefit-icon">💰</span>
+        <div class="benefit-title">Cost Efficiency</div>
+        <div class="benefit-desc">~45% cost reduction. Single-operator workflow eliminates multi-team coordination overhead. Graphics team redeployed to higher-value creative work.</div>
+      </div>
+      <div class="benefit-card">
+        <span class="benefit-icon">🎯</span>
+        <div class="benefit-title">Accuracy</div>
+        <div class="benefit-desc">AI + human review reduces transcription and formatting errors. Automated word-count validation prevents broadcast overflows. FM-font rendering is pixel-perfect.</div>
+      </div>
+      <div class="benefit-card">
+        <span class="benefit-icon">🔒</span>
+        <div class="benefit-title">Editorial Integrity</div>
+        <div class="benefit-desc">Five-gate human approval workflow. No content reaches broadcast without senior editor sign-off. AI amplifies — never replaces — journalistic judgment.</div>
+      </div>
+      <div class="benefit-card">
+        <span class="benefit-icon">🌐</span>
+        <div class="benefit-title">Remote Access</div>
+        <div class="benefit-desc">Web-based Module 1 accessible across the network domain. Journalists can work from newsroom, field, or home at 3 AM during breaking stories. The newsroom became boundaryless.</div>
+      </div>
+      <div class="benefit-card">
+        <span class="benefit-icon">📊</span>
+        <div class="benefit-title">Full Auditability</div>
+        <div class="benefit-desc">Every tagline tracked. Every session logged. Every editorial decision auditable. Dashboard provides real-time production metrics, approval rates, and session history.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Social Impact -->
+  <div class="impact-section">
+    <div class="section-label">Tech for Good — Proven Social Impact</div>
+    <div class="impact-grid">
+      <div class="impact-card">
+        <strong>Faster Disaster Alerts — Battle-Tested</strong>
+        <p>During the Ditwa Cyclone (Nov–Dec 2025), Hiru News broadcast evacuation orders, government directives, and safety warnings faster than all competing channels — during a real national emergency, while the system was in full production.</p>
+      </div>
+      <div class="impact-card">
+        <strong>Sinhala-Language Dignity</strong>
+        <p>Serves millions of rural, elderly, and lower-income Sri Lankans who rely on Sinhala TV as their primary source of news. AI corrects grammar and restores proper Sinhala spellings — preserving decades of language dignity in seconds.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Awards -->
+  <div class="awards-section">
+    <div class="section-label">Selected Awards — Hiru News (2023–2026)</div>
+    <div class="award-cols">
+      <div>
+        <div class="award-row"><span class="award-yr">2026</span><span class="award-txt">SLIM Kantar People's Awards — Most Popular News Provider</span></div>
+        <div class="award-row"><span class="award-yr">2026</span><span class="award-txt">Platinum Excellence Awards — Best News Brand</span></div>
+        <div class="award-row"><span class="award-yr">2026</span><span class="award-txt">Raigam Tele'es — Best Television News Broadcast</span></div>
+        <div class="award-row"><span class="award-yr">2025</span><span class="award-txt">Golden Business Excellence — Outstanding Humanitarian Service</span></div>
+        <div class="award-row"><span class="award-yr">2025</span><span class="award-txt">Golden Business Excellence — Most Influential Media Platform</span></div>
+      </div>
+      <div>
+        <div class="award-row"><span class="award-yr">2025</span><span class="award-txt">Diamond Awards — Most Popular News Channel</span></div>
+        <div class="award-row"><span class="award-yr">2025</span><span class="award-txt">Asia Miracle Awards — Most Popular News Channel</span></div>
+        <div class="award-row"><span class="award-yr">2024</span><span class="award-txt">SLIM Kantar — Best TV News Provider</span></div>
+        <div class="award-row"><span class="award-yr">2024</span><span class="award-txt">Raigam Tele'es — Most Popular TV News Channel</span></div>
+        <div class="award-row"><span class="award-yr">2023</span><span class="award-txt">Sumathi Awards — Best Investigative News Reporting</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Future -->
+  <div class="future-section">
+    <div class="section-label">Roadmap &amp; Wider Adoption</div>
+    <div class="future-grid">
+      <div class="future-item">Tamil &amp; English multilingual expansion</div>
+      <div class="future-item">Subscription licensing for regional broadcasters</div>
+      <div class="future-item">Full on-premise local LLM deployment</div>
+      <div class="future-item">Direct broadcast playout integration</div>
+      <div class="future-item">Mobile editorial approval app</div>
+      <div class="future-item">Real-time live subtitle generation</div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="p4-footer">
+    <div class="p4-footer-left">
+      <div class="org-name">Lotus Technologies (Pvt) Ltd</div>
+      <div class="org-sub">Under Asia Broadcasting Corporation (Pvt) Ltd &nbsp;·&nbsp; Developer &amp; Founder: Mr. Vidath Dulanjith, DevOps Engineer</div>
+    </div>
+    <div class="p4-footer-right">
+      <div class="contact">vidath@lotustechnologies.lk</div>
+      <div class="urls">asiabroadcasting.lk &nbsp;·&nbsp; hirunews.lk &nbsp;·&nbsp; hirutv.lk</div>
+    </div>
+    <div class="p4-footer-pagenum">4 of 4</div>
+  </div>
+
+</div>
+
+</body>
+</html>

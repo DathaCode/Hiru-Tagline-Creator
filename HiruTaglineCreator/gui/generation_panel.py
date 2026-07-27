@@ -89,7 +89,9 @@ class GenerationPanel(ttk.LabelFrame):
         self.get_adjustments  = get_adjustments_fn    # () -> dict
 
         self.tag_vars = []
-        self._raw_tag_lines = []  # store raw lines for re-pairing
+        self._raw_tag_lines = []
+        self.white_vars = []
+        self._raw_white_lines = []
         self.template_type = "MAIN_TAG"
         self.expanded = True
 
@@ -155,18 +157,37 @@ class GenerationPanel(ttk.LabelFrame):
                             lambda e: self.tag_canvas.itemconfig(
                                 self._cw, width=e.width))
 
-        # --- White Bed row ---
-        self.white_lf = ttk.LabelFrame(body, text="WHITE BED (1 file)", padding=4)
+        # --- White Bed lines scrollable area ---
+        self.white_lf = ttk.LabelFrame(body, text="WHITE BEDS", padding=4)
         self.white_lf.pack(fill=tk.X, pady=2)
-        white_lf = self.white_lf  # local alias for backward compat
 
-        self.white_var = tk.BooleanVar(value=True)
-        ttk.Checkbutton(white_lf, text="White Bed",
-                        variable=self.white_var).pack(side=tk.LEFT)
-        self.white_text_lbl = ttk.Label(white_lf, text="", foreground="gray")
-        self.white_text_lbl.pack(side=tk.LEFT, padx=8)
-        ttk.Button(white_lf, text="👁️ Preview", width=10,
-                   command=lambda: self._preview('white')).pack(side=tk.RIGHT)
+        white_btn_row = ttk.Frame(self.white_lf)
+        white_btn_row.pack(fill=tk.X)
+        ttk.Button(white_btn_row, text="☑ Select All", command=self._check_all_white).pack(side=tk.LEFT, padx=3)
+        ttk.Button(white_btn_row, text="☐ None", command=self._uncheck_all_white).pack(side=tk.LEFT, padx=3)
+        self.white_count_lbl = ttk.Label(white_btn_row, text="(0 lines)")
+        self.white_count_lbl.pack(side=tk.RIGHT, padx=6)
+
+        white_scroll_outer = ttk.Frame(self.white_lf)
+        white_scroll_outer.pack(fill=tk.BOTH, expand=True, pady=(4, 0))
+
+        self.white_canvas = tk.Canvas(white_scroll_outer, height=100, bg="#f8f8f8",
+                                      highlightthickness=0)
+        white_sb = ttk.Scrollbar(white_scroll_outer, orient=tk.VERTICAL,
+                                 command=self.white_canvas.yview)
+        self.white_canvas.configure(yscrollcommand=white_sb.set)
+        white_sb.pack(side=tk.RIGHT, fill=tk.Y)
+        self.white_canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
+        self.white_inner = ttk.Frame(self.white_canvas)
+        self._white_cw = self.white_canvas.create_window((0, 0), window=self.white_inner,
+                                                          anchor=tk.NW)
+        self.white_inner.bind('<Configure>',
+                              lambda e: self.white_canvas.configure(
+                                  scrollregion=self.white_canvas.bbox(tk.ALL)))
+        self.white_canvas.bind('<Configure>',
+                               lambda e: self.white_canvas.itemconfig(
+                                   self._white_cw, width=e.width))
 
         # --- Summary ---
         sep = ttk.Separator(body, orient=tk.HORIZONTAL)
@@ -213,6 +234,8 @@ class GenerationPanel(ttk.LabelFrame):
 
         if template == 'SUB_TAG':
             # ── SUB_TAG: pair consecutive lines (2 per PNG) ──
+            # Empty lines act as pair separators: every 2 consecutive entries
+            # (including empties) form one pair.
             pairs = []
             for p in range(0, len(tag_lines), 2):
                 l1 = tag_lines[p] if p < len(tag_lines) else ''
@@ -230,9 +253,9 @@ class GenerationPanel(ttk.LabelFrame):
                 ttk.Checkbutton(row, variable=var,
                                 command=self._update_summary).pack(side=tk.LEFT)
 
-                p1 = l1[:35] + ('…' if len(l1) > 35 else '')
-                p2 = l2[:35] + ('…' if len(l2) > 35 else '') if l2 else '(empty)'
-                ttk.Label(row, text=f"{start+1}-{start+2}. {p1} / {p2}").pack(
+                p1 = (l1[:35] + ('…' if len(l1) > 35 else '')) if l1 else '(empty)'
+                p2 = (l2[:35] + ('…' if len(l2) > 35 else '')) if l2 else '(empty)'
+                ttk.Label(row, text=f"Pair {pi+1}: {p1} / {p2}").pack(
                     side=tk.LEFT, padx=4)
 
                 ttk.Button(row, text="👁️", width=3,
@@ -269,10 +292,40 @@ class GenerationPanel(ttk.LabelFrame):
 
         self._update_summary()
 
-    def update_text_labels(self, topic, white):
-        """Update the short text previews for Topic and White beds."""
+    def update_white_lines(self, white_lines):
+        """Rebuild WHITE BED checkbox list and refresh summary."""
+        for w in self.white_inner.winfo_children():
+            w.destroy()
+        self.white_vars = []
+        self._raw_white_lines = white_lines
+
+        for i, line in enumerate(white_lines):
+            var = tk.BooleanVar(value=True)
+            self.white_vars.append(var)
+
+            row = ttk.Frame(self.white_inner)
+            row.pack(fill=tk.X, padx=4, pady=1)
+
+            ttk.Checkbutton(row, variable=var,
+                            command=self._update_summary).pack(side=tk.LEFT)
+
+            preview = line[:55] + ("…" if len(line) > 55 else "")
+            ttk.Label(row, text=f"{i+1:>2}. {preview}").pack(side=tk.LEFT, padx=4)
+
+            valid, msg = self.validator.validate_white_bed(line)
+            if msg:
+                fg = "orange" if valid else "red"
+                ttk.Label(row, text=f"⚠️ {msg}", foreground=fg).pack(side=tk.LEFT, padx=4)
+
+            ttk.Button(row, text="👁️", width=3,
+                       command=lambda idx=i: self._preview('white', idx)).pack(side=tk.RIGHT)
+
+        self.white_count_lbl.config(text=f"({len(white_lines)} lines)")
+        self._update_summary()
+
+    def update_text_labels(self, topic):
+        """Update the short text preview for Topic bed."""
         self.topic_text_lbl.config(text=(topic[:45] + "…") if len(topic) > 45 else topic)
-        self.white_text_lbl.config(text=(white[:45] + "…") if len(white) > 45 else white)
 
     def set_topic_visible(self, visible: bool):
         if visible:
@@ -288,9 +341,9 @@ class GenerationPanel(ttk.LabelFrame):
 
     def get_selections(self):
         return {
-            'topic': self.topic_var.get(),
-            'white': self.white_var.get(),
-            'tags':  [v.get() for v in self.tag_vars],
+            'topic':       self.topic_var.get(),
+            'white_lines': [v.get() for v in self.white_vars],
+            'tags':        [v.get() for v in self.tag_vars],
         }
 
     # ── internal ─────────────────────────────────────────────────
@@ -312,6 +365,14 @@ class GenerationPanel(ttk.LabelFrame):
         for v in self.tag_vars: v.set(False)
         self._update_summary()
 
+    def _check_all_white(self):
+        for v in self.white_vars: v.set(True)
+        self._update_summary()
+
+    def _uncheck_all_white(self):
+        for v in self.white_vars: v.set(False)
+        self._update_summary()
+
     def _update_summary(self):
         total, selected, warns = 0, 0, 0
         template = self.get_template()
@@ -326,10 +387,11 @@ class GenerationPanel(ttk.LabelFrame):
         for v in self.tag_vars:
             if v.get(): selected += 1
 
-        # White (only for MAIN_TAG)
+        # White (only for MAIN_TAG, per-line)
         if template != 'SUB_TAG':
-            total += 1
-            if self.white_var.get(): selected += 1
+            total += len(self.white_vars)
+            for v in self.white_vars:
+                if v.get(): selected += 1
 
         txt = f"SUMMARY: {selected} of {total} selected"
         if warns: txt += f"  ({warns} warning{'s' if warns > 1 else ''})"
@@ -371,9 +433,10 @@ class GenerationPanel(ttk.LabelFrame):
                         tags[idx], bed, h_scale, letter_spacing)
                     title = f"TAG Line {idx + 1}"
             elif kind == 'white':
+                if idx >= len(white): return
                 bed = self.text_renderer.template_mgr.get_bed_config(template, 'WHITE_BED')
-                text_layer = self.text_renderer.render_white_bed_text(white, bed, h_scale, letter_spacing)
-                title = "White Bed"
+                text_layer = self.text_renderer.render_white_bed_text(white[idx], bed, h_scale, letter_spacing)
+                title = f"White Bed {idx + 1}"
             else:
                 return
 
@@ -403,7 +466,7 @@ class GenerationPanel(ttk.LabelFrame):
         adj      = self.get_adjustments()
 
         # Validate
-        all_valid, errors = self.validator.validate_all(tags, white)
+        all_valid, errors = self.validator.validate_all(tags, white)  # white is a list
         hard = [e for e in errors if "✖" in e]
         if hard:
             messagebox.showerror("Validation Error", "\n".join(hard))
@@ -440,7 +503,8 @@ class GenerationPanel(ttk.LabelFrame):
             total += sum(1 for pi, c in enumerate(sel['tags']) if c and pi < len(tag_pairs))
         else:
             total += sum(1 for i, c in enumerate(sel['tags']) if c and i < len(tags) and tags[i])
-        if template != 'SUB_TAG' and sel['white'] and white: total += 1
+        if template != 'SUB_TAG':
+            total += sum(1 for i, c in enumerate(sel['white_lines']) if c and i < len(white) and white[i])
 
         if total == 0:
             messagebox.showwarning("Nothing Selected",
@@ -503,13 +567,13 @@ class GenerationPanel(ttk.LabelFrame):
                             img = self.text_renderer.render_sub_tag_bed_text(
                                 l1, l2, bed, h_scale, letter_spacing)
 
-                            words = l1.split()[:3]
+                            words = (l1 or l2).split()[:3]
                             prefix = '-'.join(w[:20] for w in words)
                             for ch in r'\/:*?"<>|':
                                 prefix = prefix.replace(ch, '')
 
                             seq_num += 1
-                            filename = f"{seq_num:03d}_{prefix or 'Untitled'}_TAG_{date}.png"
+                            filename = f"{seq_num:03d}_{prefix or 'Untitled'}_SUB_{date}.png"
                             filepath = os.path.join(session_path, filename)
                             self.text_renderer.save_png(img, filepath)
                             file_counter += 1
@@ -517,7 +581,7 @@ class GenerationPanel(ttk.LabelFrame):
                             os.utime(filepath, (target_time, target_time))
                             generated.append(filepath)
                         except Exception as e:
-                            gen_errors.append(f"TAG Pair {pi+1}: {e}")
+                            gen_errors.append(f"SUB Pair {pi+1}: {e}")
                         done += 1
                         prog.update_progress(done, total)
             else:
@@ -548,30 +612,33 @@ class GenerationPanel(ttk.LabelFrame):
                         prog.update_progress(done, total)
 
             # ═══════════════════════════════════════════════
-            # GENERATE WHITE BED (MAIN_TAG only)
+            # GENERATE WHITE BEDS (MAIN_TAG only, per-line)
             # ═══════════════════════════════════════════════
-            if template != 'SUB_TAG' and sel['white'] and white:
-                try:
-                    bed = self.text_renderer.template_mgr.get_bed_config(template, 'WHITE_BED')
-                    img = self.text_renderer.render_white_bed_text(white, bed, h_scale, letter_spacing)
+            if template != 'SUB_TAG':
+                for i, checked in enumerate(sel['white_lines']):
+                    if checked and i < len(white) and white[i]:
+                        try:
+                            line = white[i]
+                            bed = self.text_renderer.template_mgr.get_bed_config(template, 'WHITE_BED')
+                            img = self.text_renderer.render_white_bed_text(line, bed, h_scale, letter_spacing)
 
-                    words = white.split()[:3]
-                    prefix = '-'.join(w[:20] for w in words)
-                    for ch in r'\/:*?"<>|':
-                        prefix = prefix.replace(ch, '')
+                            words = line.split()[:3]
+                            prefix = '-'.join(w[:20] for w in words)
+                            for ch in r'\/:*?"<>|':
+                                prefix = prefix.replace(ch, '')
 
-                    seq_num += 1
-                    filename = f"{seq_num:03d}_{prefix or 'Untitled'}_WhiteBed_{date}.png"
-                    filepath = os.path.join(session_path, filename)
-                    self.text_renderer.save_png(img, filepath)
-                    file_counter += 1
-                    target_time = base_time + file_counter
-                    os.utime(filepath, (target_time, target_time))
-                    generated.append(filepath)
-                except Exception as e:
-                    gen_errors.append(f"White Bed: {e}")
-                done += 1
-                prog.update_progress(done, total)
+                            seq_num += 1
+                            filename = f"{seq_num:03d}_{prefix or 'Untitled'}_WhiteBed_{date}.png"
+                            filepath = os.path.join(session_path, filename)
+                            self.text_renderer.save_png(img, filepath)
+                            file_counter += 1
+                            target_time = base_time + file_counter
+                            os.utime(filepath, (target_time, target_time))
+                            generated.append(filepath)
+                        except Exception as e:
+                            gen_errors.append(f"White Bed {i+1}: {e}")
+                        done += 1
+                        prog.update_progress(done, total)
         finally:
             prog.close()
 

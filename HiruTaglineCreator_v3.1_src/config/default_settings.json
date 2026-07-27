@@ -1,0 +1,102 @@
+{
+    "version": "1.0",
+    "templates": {
+        "main_tag_path": "templates/MAIN_TAG.png",
+        "sub_tag_path": "templates/SUB_TAG.png",
+        "main_tag_dimensions": {
+            "width": 1920,
+            "height": 1080
+        },
+        "sub_tag_dimensions": {
+            "width": 1920,
+            "height": 1080
+        }
+    },
+    "beds": {
+        "main_tag": {
+            "TOPIC_BED": {
+                "x": 96,
+                "y": 572,
+                "width_min": 370,
+                "width_max": 1110,
+                "height": 62,
+                "bg_color": "#a70003",
+                "text_color": "#FFFFFF",
+                "font": "FM GANGANEE"
+            },
+            "TAG_BED": {
+                "x": 104,
+                "y": 617,
+                "width": 1110,
+                "height": 56,
+                "text_color": "#000000",
+                "font": "FM SANDHYANEE"
+            },
+            "WHITE_BED": {
+                "x": 104,
+                "y": 680,
+                "width": 1110,
+                "height": 48,
+                "text_color": "#000000",
+                "font": "FM SANDHYANEE"
+            }
+        },
+        "sub_tag": {
+            "TOPIC_BED": {
+                "x": 96,
+                "y": 572,
+                "width_min": 370,
+                "width_max": 1477,
+                "height": 62,
+                "bg_color": "#a70003",
+                "text_color": "#FFFFFF",
+                "font": "FM GANGANEE"
+            },
+            "TAG_BED": {
+                "x": 122,
+                "y": 751,
+                "width": 1477,
+                "height": 58,
+                "text_color": "#000000",
+                "font": "FM SANDHYANEE"
+            }
+        }
+    },
+    "fonts": {
+        "sizes": {
+            "topic_bed": 50.4,
+            "tag_bed": 60,
+            "white_bed": 48
+        },
+        "names": {
+            "topic_bed": "FM GANGANEE",
+            "tag_bed": "FM SANDHYANEE",
+            "white_bed": "FM SANDHYANEE"
+        },
+        "paths": {
+            "FM GANGANEE": "C:\\Users\\Hp\\AppData\\Local\\Microsoft\\Windows\\Fonts\\FMGanganee x.ttf",
+            "FM SANDHYANEE": "C:\\Users\\Hp\\AppData\\Local\\Microsoft\\Windows\\Fonts\\FMSandhyanee x.ttf"
+        }
+    },
+    "colors": {
+        "topic_bed_bg": "#a70003",
+        "topic_bed_text": "#FFFFFF",
+        "tag_bed_text": "#000000",
+        "white_bed_text": "#000000"
+    },
+    "session": {
+        "default_save_location": "C:/HiruTaglines/",
+        "auto_save_interval_seconds": 60,
+        "date_format": "YYYY-MM-DD"
+    },
+    "validation": {
+        "max_words_warning": 9,
+        "max_words_with_short": 13,
+        "short_word_length": 3
+    },
+    "window": {
+        "width": 1600,
+        "height": 1000,
+        "remember_position": true
+    }
+}

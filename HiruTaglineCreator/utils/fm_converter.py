@@ -93,22 +93,21 @@ def convert_unicode_to_fm(text):
     # ══════════════════════════════════════════════════════════════
     # Strip Zero-Width Joiner/Non-Joiner — Sinhala Unicode uses
     # ZWJ in yansaya (්‍ය) and rakaransaya (්‍ර). Stripping them
-    # makes ්ය and ්ර patterns match correctly.
+    # makes ්‍ය and ්‍ර patterns match correctly.
     # ══════════════════════════════════════════════════════════════
-    s = s.replace('\u200D', '')  # ZWJ
-    s = s.replace('\u200C', '')  # ZWNJ
+    # (ZWJ retained — yansaya/rakaransaya rules below require it.)
 
     # ══════════════════════════════════════════════════════════════
     # Word-level exceptions (MUST come before conjunct rules)
-    # දුම්රිය should NOT get rakaransaya — keep ම් and ර separate.
+    # දුම්‍රිය should NOT get rakaransaya — keep ම් and ර separate.
     # FM parts: දු=\u00FF  ම්=\u00EF  රි=\u00DF  ය=h
     # ══════════════════════════════════════════════════════════════
-    s = s.replace('දුම්රිය', '\u00FF\u00EF\u00DFh')
+    # (දුම්‍රිය exception dropped — ZWJ-aware rules handle compound words naturally.)
 
     # ══════════════════════════════════════════════════════════════
     # Special punctuation pre-processing
     # ══════════════════════════════════════════════════════════════
-    s = s.replace('ද්ර', 'ø')
+    s = s.replace('ද්‍ර', 'ø')
     s = s.replace(',', '\uFFE6')        # ￦ placeholder
     s = s.replace("'", 'z')
     s = s.replace('(', '^')
@@ -126,232 +125,262 @@ def convert_unicode_to_fm(text):
     s = s.replace(';', '\u00A6')         # ¦
 
     # ══════════════════════════════════════════════════════════════
-    # ත්රෛ special
+    # ත්‍රෛ special
     # ══════════════════════════════════════════════════════════════
-    s = s.replace('ත්රෛ', 'ff;%')
+    s = s.replace('ත්‍රෛ', 'ff;%')
 
     # ══════════════════════════════════════════════════════════════
-    # ෛ (ai vowel) conjuncts
+    # ෛ (ai vowel) conjuncts — 'ff' prefix + consonant base code.
+    # Mirror of the ෙ (e vowel) list so every consonant is covered.
     # ══════════════════════════════════════════════════════════════
+    s = s.replace('ක්ෂෛ', 'ffÌ')  # Ì
+    s = s.replace('ෂෛ', 'ffI')
+    s = s.replace('ඹෛ', 'ffU')
+    s = s.replace('ඡෛ', 'ffP')
+    s = s.replace('ඪෛ', 'ffV')
+    s = s.replace('ඝෛ', 'ff>')
+    s = s.replace('ළෛ', 'ff<')
+    s = s.replace('ඟෛ', 'ffÛ')  # Û
+    s = s.replace('ණෛ', 'ffK')
+    s = s.replace('ඵෛ', 'ffM')
+    s = s.replace('ඨෛ', 'ffG')
+    s = s.replace('ඬෛ', 'ff~')
     s = s.replace('ශෛ', 'ffY')
+    s = s.replace('ඥෛ', 'ff{')
+    s = s.replace('ඳෛ', 'ff|')
+    s = s.replace('බෛ', 'ffn')
     s = s.replace('චෛ', 'ffp')
+    s = s.replace('ඩෛ', 'ffv')
+    s = s.replace('ෆෛ', 'ff*')
+    s = s.replace('ගෛ', 'ff.')
+    s = s.replace('හෛ', 'ffy')
     s = s.replace('ජෛ', 'ffc')
     s = s.replace('කෛ', 'ffl')
+    s = s.replace('ලෛ', 'ff,')
     s = s.replace('මෛ', 'ffu')
+    s = s.replace('නෛ', 'ffk')
     s = s.replace('පෛ', 'ffm')
     s = s.replace('දෛ', 'ffo')
-    s = s.replace('තෛ', 'ff;')
-    s = s.replace('නෛ', 'ffk')
-    s = s.replace('ධෛ', 'ffO')
+    s = s.replace('රෛ', 'ffr')
+    s = s.replace('සෛ', 'ffi')
+    s = s.replace('ටෛ', 'ffg')
     s = s.replace('වෛ', 'ffj')
+    s = s.replace('තෛ', 'ff;')
+    s = s.replace('භෛ', 'ffN')
+    s = s.replace('යෛ', 'ffh')
+    s = s.replace('ඤෛ', 'ff[')
+    s = s.replace('ධෛ', 'ffO')
+    s = s.replace('ථෛ', 'ff:')
 
     # ══════════════════════════════════════════════════════════════
-    # ප්රෞ
+    # ප්‍රෞ
     # ══════════════════════════════════════════════════════════════
-    s = s.replace('ප්රෞ', 'fm%!')
+    s = s.replace('ප්‍රෞ', 'fm%!')
 
     # ══════════════════════════════════════════════════════════════
-    # ්ය + ෝ (yansaya + oo vowel)
+    # ්‍ය + ෝ (yansaya + oo vowel)
     # ══════════════════════════════════════════════════════════════
-    s = s.replace('ෂ්යෝ', 'fIHda')
-    s = s.replace('ඡ්යෝ', 'fPHda')
-    s = s.replace('ඪ්යෝ', 'fVHda')
-    s = s.replace('ඝ්යෝ', 'f>Hda')
-    s = s.replace('ඛ්යෝ', 'fLHda')
-    s = s.replace('ළ්යෝ', 'f<Hda')
-    s = s.replace('ඵ්යෝ', 'fMHda')
-    s = s.replace('ඨ්යෝ', 'fGHda')
-    s = s.replace('ශ්යෝ', 'fYHda')
-    s = s.replace('ක්ෂ්යෝ', 'f\u00CCHda')  # Ì
-    s = s.replace('බ්යෝ', 'fnHda')
-    s = s.replace('ච්යෝ', 'fpHda')
-    s = s.replace('ඩ්යෝ', 'f\u00E2Hda')  # â
-    s = s.replace('ෆ්යෝ', 'f*Hda')
-    s = s.replace('ග්යෝ', 'f.Hda')
-    s = s.replace('ජ්යෝ', 'fcHda')
-    s = s.replace('ක්යෝ', 'flHda')
-    s = s.replace('ල්යෝ', 'f,Hda')
-    s = s.replace('ම්යෝ', 'fuHda')
-    s = s.replace('න්යෝ', 'fkHda')
-    s = s.replace('ප්යෝ', 'fmHda')
-    s = s.replace('ද්යෝ', 'foHda')
-    s = s.replace('ස්යෝ', 'fiHda')
-    s = s.replace('ට්යෝ', 'fgHda')
-    s = s.replace('ව්යෝ', 'fjHda')
-    s = s.replace('ත්යෝ', 'f;Hda')
-    s = s.replace('භ්යෝ', 'fNHda')
-    s = s.replace('ධ්යෝ', 'fOHda')
-    s = s.replace('ථ්යෝ', 'f:Hda')
+    s = s.replace('ෂ්‍යෝ', 'fIHda')
+    s = s.replace('ඡ්‍යෝ', 'fPHda')
+    s = s.replace('ඪ්‍යෝ', 'fVHda')
+    s = s.replace('ඝ්‍යෝ', 'f>Hda')
+    s = s.replace('ඛ්‍යෝ', 'fLHda')
+    s = s.replace('ළ්‍යෝ', 'f<Hda')
+    s = s.replace('ඵ්‍යෝ', 'fMHda')
+    s = s.replace('ඨ්‍යෝ', 'fGHda')
+    s = s.replace('ශ්‍යෝ', 'fYHda')
+    s = s.replace('ක්ෂ්‍යෝ', 'f\u00CCHda')  # Ì
+    s = s.replace('බ්‍යෝ', 'fnHda')
+    s = s.replace('ච්‍යෝ', 'fpHda')
+    s = s.replace('ඩ්‍යෝ', 'f\u00E2Hda')  # â
+    s = s.replace('ෆ්‍යෝ', 'f*Hda')
+    s = s.replace('ග්‍යෝ', 'f.Hda')
+    s = s.replace('ජ්‍යෝ', 'fcHda')
+    s = s.replace('ක්‍යෝ', 'flHda')
+    s = s.replace('ල්‍යෝ', 'f,Hda')
+    s = s.replace('ම්‍යෝ', 'fuHda')
+    s = s.replace('න්‍යෝ', 'fkHda')
+    s = s.replace('ප්‍යෝ', 'fmHda')
+    s = s.replace('ද්‍යෝ', 'foHda')
+    s = s.replace('ස්‍යෝ', 'fiHda')
+    s = s.replace('ට්‍යෝ', 'fgHda')
+    s = s.replace('ව්‍යෝ', 'fjHda')
+    s = s.replace('ත්‍යෝ', 'f;Hda')
+    s = s.replace('භ්‍යෝ', 'fNHda')
+    s = s.replace('ධ්‍යෝ', 'fOHda')
+    s = s.replace('ථ්‍යෝ', 'f:Hda')
 
     # ══════════════════════════════════════════════════════════════
-    # ්ය + ො (yansaya + o vowel)
+    # ්‍ය + ො (yansaya + o vowel)
     # ══════════════════════════════════════════════════════════════
-    s = s.replace('ෂ්යො', 'fIHd')
-    s = s.replace('ශ්යො', 'fYHd')
-    s = s.replace('ඛ්යො', 'fLHd')
-    s = s.replace('ක්ෂ්යො', 'f\u00CCHd')
-    s = s.replace('බ්යො', 'fnHd')
-    s = s.replace('ව්යො', 'fjHd')
-    s = s.replace('ඩ්යො', 'fvHd')
-    s = s.replace('ෆ්යො', 'f*Hd')
-    s = s.replace('ග්යො', 'f.Hd')
-    s = s.replace('ජ්යො', 'fcHd')
-    s = s.replace('ක්යො', 'flHd')
-    s = s.replace('ම්යො', 'fuHd')
-    s = s.replace('ප්යො', 'fmHd')
-    s = s.replace('ද්යො', 'foHd')
-    s = s.replace('ස්යො', 'fiHd')
-    s = s.replace('ට්යො', 'fgHd')
-    s = s.replace('ව්යො', 'fjHd')
-    s = s.replace('ත්යො', 'f;Hd')
-    s = s.replace('භ්යො', 'fNHd')
-    s = s.replace('ධ්යො', 'fOHd')
-    s = s.replace('ථ්යො', 'f:Hd')
+    s = s.replace('ෂ්‍යො', 'fIHd')
+    s = s.replace('ශ්‍යො', 'fYHd')
+    s = s.replace('ඛ්‍යො', 'fLHd')
+    s = s.replace('ක්ෂ්‍යො', 'f\u00CCHd')
+    s = s.replace('බ්‍යො', 'fnHd')
+    s = s.replace('ව්‍යො', 'fjHd')
+    s = s.replace('ඩ්‍යො', 'fvHd')
+    s = s.replace('ෆ්‍යො', 'f*Hd')
+    s = s.replace('ග්‍යො', 'f.Hd')
+    s = s.replace('ජ්‍යො', 'fcHd')
+    s = s.replace('ක්‍යො', 'flHd')
+    s = s.replace('ම්‍යො', 'fuHd')
+    s = s.replace('ප්‍යො', 'fmHd')
+    s = s.replace('ද්‍යො', 'foHd')
+    s = s.replace('ස්‍යො', 'fiHd')
+    s = s.replace('ට්‍යො', 'fgHd')
+    s = s.replace('ව්‍යො', 'fjHd')
+    s = s.replace('ත්‍යො', 'f;Hd')
+    s = s.replace('භ්‍යො', 'fNHd')
+    s = s.replace('ධ්‍යො', 'fOHd')
+    s = s.replace('ථ්‍යො', 'f:Hd')
 
     # ══════════════════════════════════════════════════════════════
-    # ්ය + ෙ (yansaya + e vowel)
+    # ්‍ය + ෙ (yansaya + e vowel)
     # ══════════════════════════════════════════════════════════════
-    s = s.replace('ෂ්යෙ', 'fIH')
-    s = s.replace('ඡ්යෙ', 'fPH')
-    s = s.replace('ළ්යෙ', 'f<H')
-    s = s.replace('ණ්යෙ', 'fKH')
-    s = s.replace('ච්යෙ', 'fpH')
-    s = s.replace('ල්යෙ', 'f,H')
-    s = s.replace('න්යෙ', 'fkH')
-    s = s.replace('ශ්යෙ', 'fYH')
-    s = s.replace('ඛ්යෙ', 'fLH')
-    s = s.replace('ක්ෂ්යෙ', 'f\u00CCH')
-    s = s.replace('බ්යෙ', 'fnH')
-    s = s.replace('ඩ්යෙ', 'fvH')
-    s = s.replace('ෆ්යෙ', 'f*H')
-    s = s.replace('ග්යෙ', 'f.H')
-    s = s.replace('ජ්යෙ', 'fcH')
-    s = s.replace('ක්යෙ', 'flH')
-    s = s.replace('ම්යෙ', 'fuH')
-    s = s.replace('ප්යෙ', 'fmH')
-    s = s.replace('ද්යෙ', 'foH')
-    s = s.replace('ස්යෙ', 'fiH')
-    s = s.replace('ට්යෙ', 'fgH')
-    s = s.replace('ව්යෙ', 'fjH')
-    s = s.replace('ත්යෙ', 'f;H')
-    s = s.replace('භ්යෙ', 'fNH')
-    s = s.replace('ධ්යෙ', 'fOH')
-    s = s.replace('ථ්යෙ', 'f:H')
+    s = s.replace('ෂ්‍යෙ', 'fIH')
+    s = s.replace('ඡ්‍යෙ', 'fPH')
+    s = s.replace('ළ්‍යෙ', 'f<H')
+    s = s.replace('ණ්‍යෙ', 'fKH')
+    s = s.replace('ච්‍යෙ', 'fpH')
+    s = s.replace('ල්‍යෙ', 'f,H')
+    s = s.replace('න්‍යෙ', 'fkH')
+    s = s.replace('ශ්‍යෙ', 'fYH')
+    s = s.replace('ඛ්‍යෙ', 'fLH')
+    s = s.replace('ක්ෂ්‍යෙ', 'f\u00CCH')
+    s = s.replace('බ්‍යෙ', 'fnH')
+    s = s.replace('ඩ්‍යෙ', 'fvH')
+    s = s.replace('ෆ්‍යෙ', 'f*H')
+    s = s.replace('ග්‍යෙ', 'f.H')
+    s = s.replace('ජ්‍යෙ', 'fcH')
+    s = s.replace('ක්‍යෙ', 'flH')
+    s = s.replace('ම්‍යෙ', 'fuH')
+    s = s.replace('ප්‍යෙ', 'fmH')
+    s = s.replace('ද්‍යෙ', 'foH')
+    s = s.replace('ස්‍යෙ', 'fiH')
+    s = s.replace('ට්‍යෙ', 'fgH')
+    s = s.replace('ව්‍යෙ', 'fjH')
+    s = s.replace('ත්‍යෙ', 'f;H')
+    s = s.replace('භ්‍යෙ', 'fNH')
+    s = s.replace('ධ්‍යෙ', 'fOH')
+    s = s.replace('ථ්‍යෙ', 'f:H')
 
     # ══════════════════════════════════════════════════════════════
-    # ්ර + ෝ (rakaransaya + oo vowel)
+    # ්‍ර + ෝ (rakaransaya + oo vowel)
     # ══════════════════════════════════════════════════════════════
-    s = s.replace('ෂ්රෝ', 'fI%da')
-    s = s.replace('ඝ්රෝ', 'f>%da')
-    s = s.replace('ශ්රෝ', 'fY%da')
-    s = s.replace('ක්ෂ්රෝ', 'f\u00CC%da')
-    s = s.replace('බ්රෝ', 'fn%da')
-    s = s.replace('ඩ්රෝ', 'fv%da')
-    s = s.replace('ෆ්රෝ', 'f*%da')
-    s = s.replace('ග්රෝ', 'f.%da')
-    s = s.replace('ක්රෝ', 'fl%da')
-    s = s.replace('ප්රෝ', 'fm%da')
-    s = s.replace('ද්රෝ', 'f\u00F8da')  # ø
-    s = s.replace('ස්රෝ', 'fi%da')
-    s = s.replace('ට්රෝ', 'fg%da')
-    s = s.replace('ත්රෝ', 'f;%da')
+    s = s.replace('ෂ්‍රෝ', 'fI%da')
+    s = s.replace('ඝ්‍රෝ', 'f>%da')
+    s = s.replace('ශ්‍රෝ', 'fY%da')
+    s = s.replace('ක්ෂ්‍රෝ', 'f\u00CC%da')
+    s = s.replace('බ්‍රෝ', 'fn%da')
+    s = s.replace('ඩ්‍රෝ', 'fv%da')
+    s = s.replace('ෆ්‍රෝ', 'f*%da')
+    s = s.replace('ග්‍රෝ', 'f.%da')
+    s = s.replace('ක්‍රෝ', 'fl%da')
+    s = s.replace('ප්‍රෝ', 'fm%da')
+    s = s.replace('ද්‍රෝ', 'f\u00F8da')  # ø
+    s = s.replace('ස්‍රෝ', 'fi%da')
+    s = s.replace('ට්‍රෝ', 'fg%da')
+    s = s.replace('ත්‍රෝ', 'f;%da')
 
     # ══════════════════════════════════════════════════════════════
-    # ්ර + ො (rakaransaya + o vowel)
+    # ්‍ර + ො (rakaransaya + o vowel)
     # ══════════════════════════════════════════════════════════════
-    s = s.replace('ශ්රො', 'fY%d')
-    s = s.replace('ඩ්රො', 'fv%d')
-    s = s.replace('ෆ්රො', 'f*%d')
-    s = s.replace('ග්රො', 'f.%d')
-    s = s.replace('ක්රො', 'fl%d')
-    s = s.replace('ප්රො', 'fm%d')
-    s = s.replace('ද්රො', 'f\u00F8d')
-    s = s.replace('ස්රො', 'fi%d')
-    s = s.replace('ට්රො', 'fg%d')
-    s = s.replace('ත්රො', 'f;%d')
+    s = s.replace('ශ්‍රො', 'fY%d')
+    s = s.replace('ඩ්‍රො', 'fv%d')
+    s = s.replace('ෆ්‍රො', 'f*%d')
+    s = s.replace('ග්‍රො', 'f.%d')
+    s = s.replace('ක්‍රො', 'fl%d')
+    s = s.replace('ප්‍රො', 'fm%d')
+    s = s.replace('ද්‍රො', 'f\u00F8d')
+    s = s.replace('ස්‍රො', 'fi%d')
+    s = s.replace('ට්‍රො', 'fg%d')
+    s = s.replace('ත්‍රො', 'f;%d')
 
     # ══════════════════════════════════════════════════════════════
-    # ්ර + ේ (rakaransaya + ee vowel)
+    # ්‍ර + ේ (rakaransaya + ee vowel)
     # ══════════════════════════════════════════════════════════════
-    s = s.replace('ශ්රේ', 'fYa%')
-    s = s.replace('බ්රේ', 'f\u00ED%')  # í
-    s = s.replace('ඩ්රේ', 'f\u00E2%')  # â
-    s = s.replace('ෆ්රේ', 'f*a%')
-    s = s.replace('ග්රේ', 'f.a%')
-    s = s.replace('ක්රේ', 'fla%')
-    s = s.replace('ප්රේ', 'fma%')
-    s = s.replace('ද්රේ', 'f\u00F8a')  # ø
-    s = s.replace('ස්රේ', 'fia%')
-    s = s.replace('ත්රේ', 'f;a%')
-    s = s.replace('ධ්රේ', 'f\u00E8%')  # è
+    s = s.replace('ශ්‍රේ', 'fYa%')
+    s = s.replace('බ්‍රේ', 'f\u00ED%')  # í
+    s = s.replace('ඩ්‍රේ', 'f\u00E2%')  # â
+    s = s.replace('ෆ්‍රේ', 'f*a%')
+    s = s.replace('ග්‍රේ', 'f.a%')
+    s = s.replace('ක්‍රේ', 'fla%')
+    s = s.replace('ප්‍රේ', 'fma%')
+    s = s.replace('ද්‍රේ', 'f\u00F8a')  # ø
+    s = s.replace('ස්ට්‍රේ', 'iafÜ%')  # ස+ට cluster + rakaransaya + ේ (must precede ට්‍රේ)
+    s = s.replace('ස්‍රේ', 'fia%')
+    s = s.replace('ට්‍රේ', 'fga%')
+    s = s.replace('ත්‍රේ', 'f;a%')
+    s = s.replace('ධ්‍රේ', 'f\u00E8%')  # è
 
     # ══════════════════════════════════════════════════════════════
-    # ්ර + ෙ (rakaransaya + e vowel)
+    # ්‍ර + ෙ (rakaransaya + e vowel)
     # ══════════════════════════════════════════════════════════════
-    s = s.replace('ෂ්රෙ', 'fI%')
-    s = s.replace('ශ්රෙ', 'fY%')
-    s = s.replace('බ්රෙ', 'fn%')
-    s = s.replace('ෆ්රෙ', 'f*%')
-    s = s.replace('ග්රෙ', 'f.%')
-    s = s.replace('ක්රෙ', 'fl%')
-    s = s.replace('ප්රෙ', 'fm%')
-    s = s.replace('ද්රෙ', 'f\u00F8')
-    s = s.replace('ස්රෙ', 'fi%')
-    s = s.replace('ත්රෙ', 'f;%')
-    s = s.replace('භ්රෙ', 'fN%')
-    s = s.replace('ධ්රෙ', 'fO%')
+    s = s.replace('ෂ්‍රෙ', 'fI%')
+    s = s.replace('ශ්‍රෙ', 'fY%')
+    s = s.replace('බ්‍රෙ', 'fn%')
+    s = s.replace('ෆ්‍රෙ', 'f*%')
+    s = s.replace('ග්‍රෙ', 'f.%')
+    s = s.replace('ක්‍රෙ', 'fl%')
+    s = s.replace('ප්‍රෙ', 'fm%')
+    s = s.replace('ද්‍රෙ', 'f\u00F8')
+    s = s.replace('ස්‍රෙ', 'fi%')
+    s = s.replace('ත්‍රෙ', 'f;%')
+    s = s.replace('භ්‍රෙ', 'fN%')
+    s = s.replace('ධ්‍රෙ', 'fO%')
 
     # ══════════════════════════════════════════════════════════════
-    # ්ර + ි (rakaransaya + i vowel)
+    # ්‍ර + ි (rakaransaya + i vowel)
     # ══════════════════════════════════════════════════════════════
-    s = s.replace('ඳ්රි', '\u00A2%')
-    s = s.replace('ඨ්රි', '\u00C0%')
-    s = s.replace('ඛ්රි', '\u00C5%')
-    s = s.replace('ච්රි', '\u00D1%')
-    s = s.replace('ඵ්රි', '\u00DD%')
-    s = s.replace('ට්රි', '\u00E1%')
-    s = s.replace('ඩ්රි', '\u00E4%')
-    s = s.replace('ඬ්රි', '\u00E7%')
-    s = s.replace('ධ්රි', '\u00EA%')
-    s = s.replace('ථ්රි', '\u00D3%')
-    s = s.replace('බ්රි', '\u00EC%')
-    s = s.replace('ම්රි', '\u00F1%')
-    s = s.replace('ඹ්රි', '\u00F4%')
-    s = s.replace('ව්රි', '\u00FA%')
-    s = s.replace('ඡ්රි', '\u00FD%')
-    s = s.replace('ජ්රි', '\u00F0%')
-    s = s.replace('්රි', 's%')
+    s = s.replace('ඳ්‍රි', '\u00A2%')
+    s = s.replace('ඨ්‍රි', '\u00C0%')
+    s = s.replace('ඛ්‍රි', '\u00C5%')
+    s = s.replace('ච්‍රි', '\u00D1%')
+    s = s.replace('ඵ්‍රි', '\u00DD%')
+    s = s.replace('ට්‍රි', '\u00E1%')
+    s = s.replace('ඩ්‍රි', '\u00E4%')
+    s = s.replace('ඬ්‍රි', '\u00E7%')
+    s = s.replace('ධ්‍රි', '\u00EA%')
+    s = s.replace('ථ්‍රි', '\u00D3%')
+    s = s.replace('බ්‍රි', '\u00EC%')
+    s = s.replace('ම්‍රි', '\u00F1%')
+    s = s.replace('ඹ්‍රි', '\u00F4%')
+    s = s.replace('ව්‍රි', '\u00FA%')
+    s = s.replace('ඡ්‍රි', '\u00FD%')
+    s = s.replace('ජ්‍රි', '\u00F0%')
+    s = s.replace('්‍රි', 's%')
 
     # ══════════════════════════════════════════════════════════════
-    # ්ර + ී (rakaransaya + ii vowel)
+    # ්‍ර + ී (rakaransaya + ii vowel)
     # ══════════════════════════════════════════════════════════════
-    s = s.replace('ඳ්රී', '\u00A3%')
-    s = s.replace('ඨ්රී', '\u00C1%')
-    s = s.replace('ච්රී', '\u00D6%')
-    s = s.replace('ඵ්රී', '\u00DA%')
-    s = s.replace('ට්රී', '\u00E0%')
-    s = s.replace('ඩ්රී', '\u00E3%')
-    s = s.replace('ඬ්රී', '\u00E9%')
-    s = s.replace('ධ්රී', '\u00EB%')
-    s = s.replace('ථ්රී', '\u00D3%')
-    s = s.replace('බ්රී', '\u00EE%')
-    s = s.replace('ම්රී', '\u00F3%')
-    s = s.replace('ඹ්රී', '\u00F6%')
-    s = s.replace('ව්රී', '\u00F9%')
-    s = s.replace('ජ්රී', '\u00D4%')
-    s = s.replace('්රී', 'S%')
+    s = s.replace('ඳ්‍රී', '\u00A3%')
+    s = s.replace('ඨ්‍රී', '\u00C1%')
+    s = s.replace('ච්‍රී', '\u00D6%')
+    s = s.replace('ඵ්‍රී', '\u00DA%')
+    s = s.replace('ට්‍රී', '\u00E0%')
+    s = s.replace('ඩ්‍රී', '\u00E3%')
+    s = s.replace('ඬ්‍රී', '\u00E9%')
+    s = s.replace('ධ්‍රී', '\u00EB%')
+    s = s.replace('ථ්‍රී', '\u00D3%')
+    s = s.replace('බ්‍රී', '\u00EE%')
+    s = s.replace('ම්‍රී', '\u00F3%')
+    s = s.replace('ඹ්‍රී', '\u00F6%')
+    s = s.replace('ව්‍රී', '\u00F9%')
+    s = s.replace('ජ්‍රී', '\u00D4%')
+    s = s.replace('්‍රී', 'S%')
 
     # ══════════════════════════════════════════════════════════════
     # Exception: after ර්, never apply yansaya. Keep ර් and ය separate.
     # Convert ර් to FM code now; ය stays Unicode for vowel-combo rules.
     # ══════════════════════════════════════════════════════════════
-    s = s.replace('ර්ය', '\u00BEය')
+    s = s.replace('ර්‍ය', '\u00BEය')
 
     # ══════════════════════════════════════════════════════════════
-    # Yansaya bare (්ය) and Rakaransaya bare (්ර)
+    # Yansaya bare (්‍ය) and Rakaransaya bare (්‍ර)
     # ══════════════════════════════════════════════════════════════
-    s = s.replace('්ය', 'H')
-    s = s.replace('්ර', '%')
+    s = s.replace('්‍ය', 'H')
+    s = s.replace('්‍ර', '%')
 
     # ══════════════════════════════════════════════════════════════
     # ෞ (au vowel) with consonants
@@ -487,7 +516,7 @@ def convert_unicode_to_fm(text):
     s = s.replace('බේ', 'f\u00ED')    # í
     s = s.replace('චේ', 'f\u00C9')    # É
     s = s.replace('ඩේ', 'f\u00E2')    # â
-    s = s.replace('ෆේ', 'f*')
+    s = s.replace('ෆේ', 'f*a')
     s = s.replace('හේ', 'fya')
     s = s.replace('පේ', 'fma')
     s = s.replace('කේ', 'fla')
@@ -525,7 +554,7 @@ def convert_unicode_to_fm(text):
     s = s.replace('ඬෙ', 'f~')
     s = s.replace('ශෙ', 'fY')
     s = s.replace('ඥෙ', 'f{')
-    s = s.replace('ඳෙ', 'f\u00CB')    # Ë
+    s = s.replace('ඳෙ', 'f|')         # ඳ uses | (consistent with ඳේ/ඳෝ/ඳො)
     s = s.replace('ක්ෂෙ', 'f\u00CC')  # Ì
     s = s.replace('බෙ', 'fn')
     s = s.replace('චෙ', 'fp')
@@ -586,7 +615,7 @@ def convert_unicode_to_fm(text):
     s = s.replace('දූ', '\u00A5')      # ¥
     s = s.replace('දී', '\u00A7')      # §
     s = s.replace('ලූ', '\u00C6')      # Æ
-    # ර්ය conjunct removed — ර්ය is now kept as separate ර් + ය (no yansaya)
+    # ර්‍ය conjunct removed — ර්‍ය is now kept as separate ර් + ය (no yansaya)
     s = s.replace('ඳූ', '\u00AA')      # ª
     s = s.replace('ර්', '\u00BE')      # ¾
     s = s.replace('ඨි', '\u00C0')      # À
@@ -737,6 +766,12 @@ def convert_unicode_to_fm(text):
     s = s.replace('ෟ', '!')
     s = s.replace('ා', 'd')
     s = s.replace('්', 'a')
+
+    # ══════════════════════════════════════════════════════════════
+    # Strip any leftover ZWJ/ZWNJ — none should reach the FM output.
+    # ══════════════════════════════════════════════════════════════
+    s = s.replace('\u200D', '')
+    s = s.replace('\u200C', '')
 
     # ══════════════════════════════════════════════════════════════
     # Post-processing: restore pre-escaped punctuation

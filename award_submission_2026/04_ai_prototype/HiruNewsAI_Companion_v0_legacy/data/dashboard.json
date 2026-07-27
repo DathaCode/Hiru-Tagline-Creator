@@ -1,0 +1,96 @@
+{
+  "stats": {
+    "generated_today": 47,
+    "approved_today": 41,
+    "pending_review": 6,
+    "avg_time_seconds": 142
+  },
+  "daily_counts": [
+    {
+      "date": "2025-12-04",
+      "count": 38
+    },
+    {
+      "date": "2025-12-05",
+      "count": 52
+    },
+    {
+      "date": "2025-12-06",
+      "count": 61
+    },
+    {
+      "date": "2025-12-07",
+      "count": 55
+    },
+    {
+      "date": "2025-12-08",
+      "count": 44
+    },
+    {
+      "date": "2025-12-09",
+      "count": 47
+    },
+    {
+      "date": "2025-12-10",
+      "count": 47
+    }
+  ],
+  "recent_sessions": [
+    {
+      "name": "AKUREGODA",
+      "bulletin_slot": "6:55 PM",
+      "tagline_count": 18,
+      "status": "Approved",
+      "timestamp": "2025-12-10 17:22"
+    },
+    {
+      "name": "DITWA_CYCLONE",
+      "bulletin_slot": "9:55 PM",
+      "tagline_count": 24,
+      "status": "Approved",
+      "timestamp": "2025-12-10 21:10"
+    },
+    {
+      "name": "MATARA_FLOOD",
+      "bulletin_slot": "11:55 AM",
+      "tagline_count": 15,
+      "status": "Pending Review",
+      "timestamp": "2025-12-10 10:44"
+    },
+    {
+      "name": "PARLIAMENT",
+      "bulletin_slot": "6:55 PM",
+      "tagline_count": 21,
+      "status": "Approved",
+      "timestamp": "2025-12-09 17:31"
+    },
+    {
+      "name": "ECONOMY_Q3",
+      "bulletin_slot": "9:55 PM",
+      "tagline_count": 19,
+      "status": "Approved",
+      "timestamp": "2025-12-09 20:58"
+    },
+    {
+      "name": "GALLE_ROAD",
+      "bulletin_slot": "11:55 AM",
+      "tagline_count": 12,
+      "status": "Rejected",
+      "timestamp": "2025-12-08 11:12"
+    },
+    {
+      "name": "CABINET_MTG",
+      "bulletin_slot": "6:55 PM",
+      "tagline_count": 17,
+      "status": "Approved",
+      "timestamp": "2025-12-08 16:45"
+    },
+    {
+      "name": "HEALTH_MIN",
+      "bulletin_slot": "9:55 PM",
+      "tagline_count": 20,
+      "status": "Changes Requested",
+      "timestamp": "2025-12-07 21:03"
+    }
+  ]
+}

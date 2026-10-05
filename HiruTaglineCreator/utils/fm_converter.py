@@ -13,7 +13,46 @@ before their component base characters, or the output will be garbled.
 
 
 # PUA offset for Latin letter escaping
+import re
+import unicodedata
+
+
 _LATIN_PUA_BASE = 0xE000
+
+
+# ══════════════════════════════════════════════════════════════════
+# Generic kombuwa (ෙ-class vowel) fallback.
+# In FM fonts the kombuwa glyph 'f' is typed BEFORE its consonant,
+# with an optional tail after it:
+#     ෙ → f + C        ේ → f + C + a     ෛ → ff + C
+#     ො → f + C + d    ෝ → f + C + da    ෞ → f + C + !
+# The tables inside convert_unicode_to_fm() enumerate the common
+# consonants; this rebuilds any pair they miss, so a vowel sign can
+# never survive as raw Unicode. (FM fonts have no glyph in
+# U+0D80–U+0DFF, so a survivor renders as nothing at all.)
+# ══════════════════════════════════════════════════════════════════
+_KOMBUWA_FIX = {
+    'ෙ': ('f', ''),     # ෙ
+    'ේ': ('f', 'a'),    # ේ
+    'ෛ': ('ff', ''),    # ෛ
+    'ො': ('f', 'd'),    # ො
+    'ෝ': ('f', 'da'),   # ෝ
+    'ෞ': ('f', '!'),    # ෞ
+}
+
+# consonant + already-converted rakaransaya/yansaya ('%' / 'H') + kombuwa
+_KOMBUWA_RE = re.compile('([ක-ෆ])([%H]?)([ෙ-ෞ])')
+
+
+def _kombuwa_fallback(m):
+    head, tail = _KOMBUWA_FIX[m.group(3)]
+    return head + m.group(1) + m.group(2) + tail
+
+
+def find_unconverted_sinhala(fm_text):
+    """Return any Sinhala Unicode chars left in FM output (should be none)."""
+    return [c for c in fm_text if 0x0D80 <= ord(c) <= 0x0DFF]
+
 
 
 def _escape_latin(text):
@@ -82,7 +121,9 @@ def convert_unicode_to_fm(text):
     if not text:
         return text
 
-    s = str(text)
+    # Compose decomposed vowel signs first: some Sinhala IMEs emit
+    # ෝ as ෙ+ා (U+0DD9 U+0DCF) rather than U+0DDD, which matches nothing.
+    s = unicodedata.normalize('NFC', str(text))
 
     # ══════════════════════════════════════════════════════════════
     # Escape Latin letters (A-Za-z) to PUA range so they survive
@@ -107,7 +148,8 @@ def convert_unicode_to_fm(text):
     # ══════════════════════════════════════════════════════════════
     # Special punctuation pre-processing
     # ══════════════════════════════════════════════════════════════
-    s = s.replace('ද්‍ර', 'ø')
+    # NOTE: bare ද්‍ර → ø now runs further down, AFTER the
+    # ද්‍ර + vowel rules — replacing it here killed ද්‍රෝ / රො / රේ / රෙ.
     s = s.replace(',', '\uFFE6')        # ￦ placeholder
     s = s.replace("'", 'z')
     s = s.replace('(', '^')
@@ -128,6 +170,7 @@ def convert_unicode_to_fm(text):
     # ත්‍රෛ special
     # ══════════════════════════════════════════════════════════════
     s = s.replace('ත්‍රෛ', 'ff;%')
+    s = s.replace('ද්‍රෛ', 'ffø')     # ø — ද්‍ර is one glyph, no '%'
 
     # ══════════════════════════════════════════════════════════════
     # ෛ (ai vowel) conjuncts — 'ff' prefix + consonant base code.
@@ -176,6 +219,7 @@ def convert_unicode_to_fm(text):
     # ප්‍රෞ
     # ══════════════════════════════════════════════════════════════
     s = s.replace('ප්‍රෞ', 'fm%!')
+    s = s.replace('ද්‍රෞ', 'fø!')     # ø
 
     # ══════════════════════════════════════════════════════════════
     # ්‍ය + ෝ (yansaya + oo vowel)
@@ -340,6 +384,13 @@ def convert_unicode_to_fm(text):
     s = s.replace('ත්‍රෙ', 'f;%')
     s = s.replace('භ්‍රෙ', 'fN%')
     s = s.replace('ධ්‍රෙ', 'fO%')
+
+    # ══════════════════════════════════════════════════════════════
+    # ද්‍ර bare — one dedicated FM glyph (ø), not ද + rakaransaya.
+    # MUST stay below the ද්‍ර + kombuwa rules above and above the
+    # ්‍රි / ්‍රී rules below, which then see a plain ø + ි/ී.
+    # ══════════════════════════════════════════════════════════════
+    s = s.replace('ද්‍ර', 'ø')        # ø
 
     # ══════════════════════════════════════════════════════════════
     # ්‍ර + ි (rakaransaya + i vowel)
@@ -590,6 +641,13 @@ def convert_unicode_to_fm(text):
     s = s.replace('ඤෙ', 'f[')
     s = s.replace('ධෙ', 'fO')
     s = s.replace('ථෙ', 'f:')
+
+    # ══════════════════════════════════════════════════════════════
+    # Kombuwa safety net — rebuilds every consonant + ෙ/ේ/ෛ/ො/ෝ/ෞ
+    # pair the tables above do not list (see _KOMBUWA_RE). Runs after
+    # all of them, so every hand-tuned glyph still wins.
+    # ══════════════════════════════════════════════════════════════
+    s = _KOMBUWA_RE.sub(_kombuwa_fallback, s)
 
     # ══════════════════════════════════════════════════════════════
     # u/uu vowel special cases for common consonants

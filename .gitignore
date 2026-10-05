@@ -1,2 +1,5 @@
 BEDS AND DOC/
 HiruTaglineCreator_v1.1/
+__pycache__/
+*.pyc
+*.bak

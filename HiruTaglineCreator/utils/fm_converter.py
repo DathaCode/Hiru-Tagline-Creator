@@ -55,30 +55,50 @@ def find_unconverted_sinhala(fm_text):
 
 
 
+# Quote marks have no usable glyph in FM Sandhyanee / FM Ganganee (FM '"' is
+# a comma, FM 'z' a stray tick), so they are routed to the English font
+# (Arial) exactly like Latin letters. Curly variants come from Word pastes.
+_ARIAL_PUA = {
+    '"':      0xE022,
+    "'":      0xE027,
+    '‘': 0xE100,   # ‘
+    '’': 0xE101,   # ’
+    '“': 0xE102,   # “
+    '”': 0xE103,   # ”
+}
+_ARIAL_PUA_REVERSE = {code: ch for ch, code in _ARIAL_PUA.items()}
+
+
 def _escape_latin(text):
-    """Replace A-Za-z with PUA equivalents so they survive FM conversion."""
+    """Replace A-Za-z and quote marks with PUA equivalents so they survive
+    FM conversion and are drawn in the English font."""
     result = []
     for ch in text:
         if 'A' <= ch <= 'Z' or 'a' <= ch <= 'z':
             result.append(chr(_LATIN_PUA_BASE + ord(ch)))
+        elif ch in _ARIAL_PUA:
+            result.append(chr(_ARIAL_PUA[ch]))
         else:
             result.append(ch)
     return ''.join(result)
 
 
+def _restore_english(code):
+    """Original char for a PUA-escaped code, or None if it is FM text."""
+    if _LATIN_PUA_BASE + 0x41 <= code <= _LATIN_PUA_BASE + 0x7A:
+        return chr(code - _LATIN_PUA_BASE)
+    return _ARIAL_PUA_REVERSE.get(code)
+
+
 def has_english_segments(text):
     """Check if converted text contains PUA-encoded English characters."""
-    for ch in text:
-        code = ord(ch)
-        if _LATIN_PUA_BASE + 0x41 <= code <= _LATIN_PUA_BASE + 0x7A:
-            return True
-    return False
+    return any(_restore_english(ord(ch)) is not None for ch in text)
 
 
 def split_fm_and_english(text):
     """
     Split FM-converted text into segments of (string, is_fm).
-    PUA-encoded chars (English letters) → (original_letter, False)
+    PUA-encoded chars (English letters, quote marks) → (original, False)
     Regular chars (FM ASCII) → (text, True)
     """
     segments = []
@@ -86,15 +106,14 @@ def split_fm_and_english(text):
     current_is_fm = True
 
     for ch in text:
-        code = ord(ch)
-        is_pua = (_LATIN_PUA_BASE + 0x41 <= code <= _LATIN_PUA_BASE + 0x7A)
+        original = _restore_english(ord(ch))
 
-        if is_pua:
+        if original is not None:
             if current and current_is_fm:
                 segments.append((''.join(current), True))
                 current = []
             current_is_fm = False
-            current.append(chr(code - _LATIN_PUA_BASE))  # restore original letter
+            current.append(original)  # restore original letter / quote mark
         else:
             if current and not current_is_fm:
                 segments.append((''.join(current), False))
@@ -126,8 +145,8 @@ def convert_unicode_to_fm(text):
     s = unicodedata.normalize('NFC', str(text))
 
     # ══════════════════════════════════════════════════════════════
-    # Escape Latin letters (A-Za-z) to PUA range so they survive
-    # the FM conversion and can be rendered with a regular font.
+    # Escape Latin letters (A-Za-z) and quote marks to PUA so they survive
+    # the FM conversion and are rendered with the English font (Arial).
     # ══════════════════════════════════════════════════════════════
     s = _escape_latin(s)
 
@@ -151,7 +170,7 @@ def convert_unicode_to_fm(text):
     # NOTE: bare ද්‍ර → ø now runs further down, AFTER the
     # ද්‍ර + vowel rules — replacing it here killed ද්‍රෝ / රො / රේ / රෙ.
     s = s.replace(',', '\uFFE6')        # ￦ placeholder
-    s = s.replace("'", 'z')
+    # ' and " never reach here — escaped to PUA above, drawn in Arial.
     s = s.replace('(', '^')
     s = s.replace(')', '&')
     s = s.replace('%', ']')

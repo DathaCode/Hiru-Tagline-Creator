@@ -102,6 +102,13 @@ FM font and looked at. See [verification.md](verification.md).
 5. Run `scripts/fm_render.py <word>` and **look at the PNG**.
 6. Append an entry to [corrections-log.md](corrections-log.md) — date, word, rule, reason.
 
+## Characters drawn in Arial instead of FM
+
+Latin `A-Za-z` and the quote marks `' " ‘ ’ “ ”` are escaped to Private Use codepoints at
+the start of the function and drawn by `text_renderer` in bold Arial (see `_ARIAL_PUA`,
+`split_fm_and_english()`). If the user reports a symbol that FM cannot draw, add it there —
+do not invent an FM byte for it.
+
 ## Known gaps (as of 2026-09-23)
 
 - **`ඞ` (kantaja naasikyaya) has no base mapping.** Only `ඞ්`→`Ù` and `ඞී`→`ü` exist, so
@@ -113,6 +120,6 @@ FM font and looked at. See [verification.md](verification.md).
 - **`ර්ණ`→`“` is shadowed** by `ර්`→`¾`; `වර්ණ` renders `j¾K`. Same story as above.
 - `ඪී`, `ථී`, `ඞ්`, `ඡි` each appear twice with different values; the second is dead.
   Harmless, but do not add a third.
-- `HiruTaglineCreator_v3.1_src/` (the SLASSCOM award fork, April 2026) carries an older
-  copy of this file and still has the `ද්‍ර` bug. It is a frozen submission artifact —
-  port fixes into it only if asked.
+- `award_submission_2026/HiruTaglineCreator_v3.1_src/` (the SLASSCOM award fork) carries
+  its own copy of this file. The user has asked for fixes to be ported there; after a
+  change, copy the file across and run `fm_regress.py` from that folder too.

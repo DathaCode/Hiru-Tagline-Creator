@@ -7,7 +7,7 @@ at them. Byte-correct output is not proof — this is the final check.
     py -3 fm_render.py --compare utils/fm_converter.py.bak ද්‍රෝහීයා
 
 --compare renders a second column using another copy of the converter (a .bak, or the
-copy in HiruTaglineCreator_v3.1_src/), which is how a before/after is demonstrated.
+copy in award_submission_2026/HiruTaglineCreator_v3.1_src/), which is how a before/after is demonstrated.
 
 Output: fm_render.png next to this script, on the tag-bed orange (#ffaa3a).
 

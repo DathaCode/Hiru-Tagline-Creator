@@ -22,7 +22,8 @@ from _common import setup_stdout, converter_path, load, leaks   # noqa: E402
 setup_stdout()
 HERE = os.path.dirname(os.path.abspath(__file__))
 GOLDEN = os.path.join(HERE, 'golden_corpus.tsv')
-CONV = load(converter_path()).convert_unicode_to_fm
+MOD = load(converter_path())
+CONV = MOD.convert_unicode_to_fm
 
 # No ZWJ → no ligature. Output must contain neither '%' (rakaransaya) nor 'H' (yansaya).
 SUPPRESS = [
@@ -52,7 +53,12 @@ CORPUS = SUPPRESS + PRESERVE + [
     'ගාල්ල', 'ත්‍රිකුණාමලය', 'අම්පාර', 'හදිසි ප්‍රවෘත්තිය', 'කාලගුණය', 'ගුවන් තොටුපළ',
     # ── mixed Sinhala + English (Latin must survive) ──
     'ජනාධිපති BREAKING', 'COVID රෝගීන්',
+] + [
+    # ── quote marks must be drawn in Arial, never FM (fixed 2026-10-05) ──
+    "'ද්‍රෝහියා'", '"සෛල"', '“ද්‍රෝහියා”', '‘සෛල’', "රට's",
 ]
+
+QUOTES = set('\'"‘’“”')
 
 if '--update' in sys.argv:
     with open(GOLDEN, 'w', encoding='utf-8', newline='\n') as fh:
@@ -99,6 +105,12 @@ for w in PRESERVE:
     if not any(g in out for g in ('%', 'H', 'ø')):
         fails += 1
         print('LOST     %-20s -> %r   ZWJ ligature disappeared' % (w, out))
+
+for w in CORPUS:
+    for seg, is_fm in MOD.split_fm_and_english(CONV(w)):
+        if is_fm and QUOTES & set(seg):
+            fails += 1
+            print('FM QUOTE %-20s segment %r would draw a quote in the FM font' % (w, seg))
 
 print()
 print('%d words · %d changed/leaking · %d not yet in golden file' % (len(CORPUS), fails, missing))

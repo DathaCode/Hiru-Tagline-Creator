@@ -2,8 +2,8 @@
 
 Windows desktop app that turns Sinhala text into 1920×1080 broadcast tagline PNGs for
 Hiru News. Tkinter UI, PyQt5 text rendering, Pillow compositing, PyInstaller onefile.
-Working copy: **`HiruTaglineCreator/`** (the `_v2.1`, `_v3.1`, `_v3.1_src` folders are
-frozen snapshots).
+Working copy: **`HiruTaglineCreator/`**. The SLASSCOM award fork lives at
+`award_submission_2026/HiruTaglineCreator_v3.1_src/` and gets converter fixes copied in.
 
 ## Read these before working
 

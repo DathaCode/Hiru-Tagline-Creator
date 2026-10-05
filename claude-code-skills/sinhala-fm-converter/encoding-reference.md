@@ -79,7 +79,11 @@ Fused exceptions: `දු`→`ÿ`, `දූ`→`¥`, `දි`→`È`, `දී`→
   cannot mangle them, then split back out by `split_fm_and_english()`; `text_renderer`
   draws those runs in a normal English font (bold). That is why mixed
   "ජනාධිපති BREAKING" taglines work.
-- **Punctuation is remapped**, not passed through: `,`→`"` · `.`→`'` · `(`→`^` · `)`→`&` ·
+- **Quote marks go to Arial**, not FM: `'` `"` `‘` `’` `“` `”` are escaped to PUA
+  (`_ARIAL_PUA`) alongside Latin letters and drawn in the English font. FM fonts have no
+  usable quote glyph — FM's `"` slot is a comma. Add any other character the FM fonts
+  cannot draw to `_ARIAL_PUA` the same way.
+- **Other punctuation is remapped**, not passed through: `,`→`"` · `.`→`'` · `(`→`^` · `)`→`&` ·
   `%`→`]` · `/`→`$` · `?`→`@` · `!`→`æ` · `=`→`}` · `:`→`(` · `;`→`¦` · `+`→`¬` ·
   en-dash → hyphen.
 - **NFC normalisation** runs first (added 2026-09-23): `ෙ`+`ා` → `ෝ`, `ෙ`+`්` → `ේ`,

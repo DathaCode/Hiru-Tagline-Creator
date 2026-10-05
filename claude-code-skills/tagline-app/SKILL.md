@@ -6,8 +6,7 @@ description: Architecture and behaviour of the HiruTaglineCreator desktop app �
 # HiruTaglineCreator — app architecture
 
 Windows desktop tool that turns Sinhala text into 1920×1080 broadcast tagline PNGs for
-Hiru News. **Working copy: `HiruTaglineCreator/`** — the other folders are frozen
-snapshots (see below).
+Hiru News. **Working copy: `HiruTaglineCreator/`** (see the folder table below).
 
 ## Stack, and the one surprising thing about it
 
@@ -107,7 +106,6 @@ available.
 | Folder | What it is |
 |---|---|
 | `HiruTaglineCreator/` | **the working copy** — edit here |
-| `HiruTaglineCreator_v2.1/` | shipped v2.1 exe + runtime assets, no source |
-| `HiruTaglineCreator_v3.1/`, `_v3.1_src/` | April 2026 fork built for the SLASSCOM award submission; carries an older `fm_converter.py`. Frozen — do not sync unless asked |
 | `award_submission_2026/` | SLASSCOM SNIA 2026 package (document, brochure, video script, AI prototype) |
+| `award_submission_2026/HiruTaglineCreator_v3.1_src/` | the award fork of the app; receives `fm_converter.py` fixes |
 | `config/` | a stray root-level `settings.json`; the app reads `HiruTaglineCreator/config/` |

@@ -166,6 +166,26 @@ were broken before.
 
 ---
 
+## 2026-10-05 · quote marks drawn in Arial
+
+**Reported:** `'ද්‍රෝහියා'` and `"සෛල"` rendered with wrong quote glyphs — `"` came out as
+a comma pair (`,සෛල,`) and `'` as a stray tick.
+
+**Root cause:** neither FM Sandhyanee nor FM Ganganee has a usable quote glyph. `"` was
+passed through untouched, and FM's `"` slot is the comma glyph; `'` was mapped to `z`,
+which is not a quote either.
+
+**Fix:** quote marks now take the same route as English letters — escaped to PUA at the
+start of `convert_unicode_to_fm()` (`_ARIAL_PUA`: `"`→U+E022, `'`→U+E027, `‘ ’ “ ”`→
+U+E100–E103), split back out by `split_fm_and_english()`, and drawn by `text_renderer` in
+the English font (Arial, bold). Curly quotes are included because Word pastes produce them.
+The old `'`→`z` rule is gone (unreachable). Applies to all three beds.
+
+**Verified:** rendered through the real `TextRenderer.render_tag_bed_text()`; `fm_regress.py`
+now fails if any quote mark lands in an FM segment (confirmed it catches the old code).
+
+---
+
 ## Reference lists
 
 ### Must render WITHOUT a ligature (plain clusters, no ZWJ)

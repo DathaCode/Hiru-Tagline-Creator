@@ -5,7 +5,7 @@ description: Build and ship a HiruTaglineCreator Windows executable with PyInsta
 
 # Building a release
 
-Latest shipped: **v2.6** (2026-07-27), `HiruTaglineCreator/dist/HiruTaglineCreator_v2.6.exe`,
+Latest shipped: **v3.1** (2026-10-05), `HiruTaglineCreator/dist/HiruTaglineCreator_v3.1.exe`,
 ≈59 MB, onefile, no console window.
 
 ## Procedure
@@ -16,7 +16,7 @@ Latest shipped: **v2.6** (2026-07-27), `HiruTaglineCreator/dist/HiruTaglineCreat
 2. **Bump the version in two places** (they must match, or the spec and the build script
    disagree):
    - `build_exe.py` → `--name=HiruTaglineCreator_vX.Y`
-   - copy `HiruTaglineCreator_v2.6.spec` → `HiruTaglineCreator_vX.Y.spec`, updating both
+   - copy the latest `HiruTaglineCreator_vX.Y.spec` → `HiruTaglineCreator_vX.Y.spec`, updating both
      the `name=` in `EXE(...)` and the filename.
 3. **Close any running copy of the exe.** PyInstaller fails with `PermissionError` if the
    target exe is open — this has bitten before.

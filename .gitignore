@@ -3,3 +3,6 @@ HiruTaglineCreator_v1.1/
 __pycache__/
 *.pyc
 *.bak
+
+# ffmpeg is over GitHub's 100 MB limit, keep it local
+ffmpeg.exe

@@ -7,3 +7,4 @@ __pycache__/
 # ffmpeg is over GitHub's 100 MB limit, keep it local
 ffmpeg.exe
 version_info.txt
+LotusSubs/installer/Output/

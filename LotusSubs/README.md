@@ -15,8 +15,25 @@ and mixed-language speech.
 1. Install **Python 3.11 or newer** from https://python.org (tick *"Add python.exe to PATH"*).
 2. Unzip this folder, then double-click **`build.bat`**.
    It installs the libraries, downloads FFmpeg, and builds the app (about 5–10 minutes).
-3. Your app is at **`dist\LotusSubs\LotusSubs.exe`**. Zip the whole `dist\LotusSubs`
-   folder to share it with your team. They don't need Python.
+3. Your app is at **`dist\LotusSubs\LotusSubs.exe`**.
+4. Install **Inno Setup 6** once (free: https://jrsoftware.org/isdl.php, or
+   `winget install JRSoftware.InnoSetup`), then double-click **`build_installer.bat`**.
+5. Send users the single file **`installer\Output\LotusSubs-Setup-<version>.exe`**.
+   They don't need Python or anything else.
+
+### Installing on a user's PC
+
+- Requires **Windows 10 or 11, 64-bit**.
+- Run `LotusSubs-Setup-<version>.exe` → Next → Install. No admin rights needed
+  (it installs for that user; an admin can choose "all users").
+- If SmartScreen says *"Windows protected your PC"*: **More info → Run anyway**
+  (the installer isn't code-signed).
+- Then an admin opens **🔒 Settings** and enters the Gemini key, once per Windows user.
+- To update: run the newer setup over the old one. To remove: Settings → Apps → LotusSubs.
+
+Don't share the bare `dist\LotusSubs` folder as a zip: if a user starts `LotusSubs.exe`
+from inside the zip, or copies the .exe without its `_internal` folder, it fails with
+*"Failed to load Python DLL"*.
 
 ## 2. Get a Gemini API key (free)
 
@@ -78,6 +95,7 @@ Free-tier limits are per Google project, so separate keys on different PCs = sep
 | `art/logo_source.jpg` | Original logo artwork (not bundled) |
 | `assets/subtag_bed.png` | The orange bed, cut from HiruTaglineCreator's `templates/SUB_TAG.png` |
 | `build.bat` | Builds `LotusSubs.exe` with PyInstaller |
+| `build_installer.bat`, `installer/LotusSubs.iss` | Builds the one-file setup with Inno Setup |
 | `run_dev.bat` | Runs from source while you make changes |
 | `fonts/` | Bundled Sinhala/Tamil/Latin fonts |
 | `bin/` | `ffmpeg.exe` goes here (not in git – it's over GitHub's 100 MB limit) |

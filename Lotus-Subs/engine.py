@@ -1,9 +1,9 @@
 """
-LankaSubs engine
+LotusSubs engine
 - Extracts audio from a video with FFmpeg
 - Sends audio chunks to Gemini to transcribe + translate (Sinhala / Tamil / English)
-- Reads/writes SRT, builds ASS (styled) subtitles
-- Burns subtitles into the video with FFmpeg + libass (proper Sinhala/Tamil shaping)
+- Reads/writes SRT
+- Burns the SUB TAG overlay images into the video with FFmpeg
 """
 from __future__ import annotations
 
@@ -72,7 +72,7 @@ def find_ffmpeg() -> str:
     if on_path:
         return on_path
     raise FileNotFoundError(
-        "FFmpeg was not found. Put ffmpeg.exe inside the 'bin' folder next to LankaSubs.exe."
+        "FFmpeg was not found. Put ffmpeg.exe inside the 'bin' folder next to LotusSubs.exe."
     )
 
 
@@ -129,14 +129,6 @@ def fmt_srt_time(t: float) -> str:
     return f"{h:02d}:{m:02d}:{s:02d},{ms:03d}"
 
 
-def fmt_ass_time(t: float) -> str:
-    t = max(0.0, t)
-    cs = int(round(t * 100))
-    h, cs = divmod(cs, 360000)
-    m, cs = divmod(cs, 6000)
-    s, cs = divmod(cs, 100)
-    return f"{h}:{m:02d}:{s:02d}.{cs:02d}"
-
 
 # ----------------------------------------------------------------- Gemini ----
 
@@ -177,6 +169,9 @@ Do the following:
    that a native speaker would expect in subtitles, keeping the meaning, tone and context
    of the whole conversation, not word-for-word. Keep personal names and place names.
    If a segment is already in {target}, put a clean version of it as the translation.
+   The translation is shown on a two-line TV caption bar: write it as ONE or TWO lines,
+   each at most about 40 characters, with a "\\n" line break between the two lines,
+   breaking at a natural phrase boundary. Never more than two lines.
 3. Timestamps are relative to the start of THIS audio, formatted MM:SS.mmm
    (e.g. 01:07.250), and must lie between 00:00.000 and the audio length.
 4. Skip silence, music and background noise. Never invent dialogue that is not spoken.
@@ -257,7 +252,7 @@ def generate_subtitles(
     all_cues: List[Cue] = []
     languages: dict = {}
 
-    with tempfile.TemporaryDirectory(prefix="lankasubs_") as tmp:
+    with tempfile.TemporaryDirectory(prefix="lotussubs_") as tmp:
         for i in range(n_chunks):
             if is_cancelled():
                 raise CancelledError()
@@ -297,7 +292,7 @@ def generate_subtitles(
     return clean_cues(all_cues, info["duration"] or None), detected
 
 
-# --------------------------------------------------------------- SRT / ASS ---
+# -------------------------------------------------------------------- SRT ---
 
 def cues_to_srt(cues: List[Cue], use_original: bool = False) -> str:
     out = []
@@ -321,67 +316,64 @@ def srt_to_cues(content: str) -> List[Cue]:
     return cues
 
 
-def _ass_escape(text: str) -> str:
-    text = text.replace("\\", "\u29f5").replace("{", "(").replace("}", ")")
-    return text.replace("\r", "").replace("\n", "\\N")
-
-
-def cues_to_ass(cues: List[Cue], target: str, width: int, height: int,
-                font_size: int = 54, margin_v: int = 60, box: bool = False) -> str:
-    """font_size and margin_v are in 1080p units; they scale to any resolution."""
-    play_y = 1080
-    play_x = max(1, round(1080 * width / max(1, height)))
-    font = LANGUAGES.get(target, LANGUAGES["English"])["font"]
-    border_style, outline, shadow = (3, 8, 0) if box else (1, 3, 1)
-    back = "&H99000000" if box else "&H80000000"
-    outline_col = "&H99000000" if box else "&H00000000"
-    header = f"""[Script Info]
-ScriptType: v4.00+
-PlayResX: {play_x}
-PlayResY: {play_y}
-WrapStyle: 0
-ScaledBorderAndShadow: yes
-
-[V4+ Styles]
-Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Default,{font},{font_size},&H00FFFFFF,&H000000FF,{outline_col},{back},0,0,0,0,100,100,0,0,{border_style},{outline},{shadow},2,{int(play_x*0.06)},{int(play_x*0.06)},{margin_v},1
-
-[Events]
-Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
-"""
-    lines = [f"Dialogue: 0,{fmt_ass_time(c.start)},{fmt_ass_time(c.end)},Default,,0,0,0,,{_ass_escape(c.text)}"
-             for c in cues if c.text.strip()]
-    return header + "\n".join(lines) + "\n"
-
-
 # ------------------------------------------------------------------- burn ----
+
+def _overlay_geometry(width: int, height: int, bed_w: int, bed_h: int, bed_x: int, bed_y: int):
+    """Bed size and position on this video. The 1920x1080 layout is scaled to the video
+    width and anchored to the bottom, so 16:9 video gets the exact template position."""
+    s = width / 1920
+    ow, oh = max(2, round(bed_w * s)), max(2, round(bed_h * s))
+    return ow, oh, round(bed_x * s), height - round((1080 - bed_y) * s)
+
 
 def burn_subtitles(
     video: str,
     cues: List[Cue],
-    target: str,
     output: str,
-    font_size: int = 54,
-    margin_v: int = 60,
-    box: bool = False,
+    render_overlay: Callable[[str, str], None],
+    bed: tuple,
     quality_crf: int = 20,
     progress: Callable[[int, str], None] = lambda p, m: None,
     is_cancelled: Callable[[], bool] = lambda: False,
 ) -> str:
+    """render_overlay(text, png_path) writes one bed image; text "" means transparent.
+    bed = (bed_w, bed_h, bed_x, bed_y) in 1920x1080 units.
+    Each cue's bed is shown only from its start to its end time."""
     ffmpeg = find_ffmpeg()
     info = probe_video(ffmpeg, video)
     duration = info["duration"] or 1.0
 
-    with tempfile.TemporaryDirectory(prefix="lankasubs_burn_") as tmp:
-        # Relative paths inside the filter avoid Windows "C:\" escaping problems.
-        with open(os.path.join(tmp, "subs.ass"), "w", encoding="utf-8") as f:
-            f.write(cues_to_ass(cues, target, info["width"], info["height"], font_size, margin_v, box))
-        shutil.copytree(fonts_dir(), os.path.join(tmp, "fonts"))
+    with tempfile.TemporaryDirectory(prefix="lotussubs_burn_") as tmp:
+        render_overlay("", os.path.join(tmp, "blank.png"))
+        entries, t = [], 0.0
+        for i, c in enumerate(cues):
+            if is_cancelled():
+                raise CancelledError()
+            progress(int(5 * i / max(1, len(cues))), f"Drawing subtitle {i + 1}/{len(cues)}…")
+            name = f"sub_{i:05d}.png"
+            render_overlay(c.text, os.path.join(tmp, name))
+            if c.start > t:
+                entries.append(("blank.png", c.start - t))
+            start = max(c.start, t)
+            if c.end > start:
+                entries.append((name, c.end - start))
+                t = c.end
+        entries.append(("blank.png", max(1.0, duration - t)))
+        with open(os.path.join(tmp, "overlay.ffconcat"), "w", encoding="utf-8") as f:
+            f.write("ffconcat version 1.0\n")
+            for name, dur in entries:
+                f.write(f"file '{name}'\nduration {dur:.3f}\n")
+            f.write("file 'blank.png'\n")  # the concat demuxer drops the last duration
 
+        ow, oh, ox, oy = _overlay_geometry(info["width"], info["height"], *bed)
+        graph = (f"[1:v]format=rgba,scale={ow}:{oh}[bed];"
+                 f"[0:v][bed]overlay={ox}:{oy}:eof_action=pass:format=auto,format=yuv420p[v]")
+        # Relative paths: the overlay images are referenced from inside tmp.
         cmd = [ffmpeg, "-hide_banner", "-y", "-i", os.path.abspath(video),
-               "-vf", "ass=subs.ass:fontsdir=fonts:shaping=complex",  # complex = correct Sinhala/Tamil shaping
+               "-f", "concat", "-safe", "0", "-i", "overlay.ffconcat",
+               "-filter_complex", graph, "-map", "[v]", "-map", "0:a?",
                "-c:v", "libx264", "-preset", "medium", "-crf", str(quality_crf),
-               "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", "192k",
+               "-c:a", "aac", "-b:a", "192k",
                "-movflags", "+faststart", "-progress", "pipe:1", "-nostats",
                os.path.abspath(output)]
         log_path = os.path.join(tmp, "ffmpeg.log")
@@ -401,7 +393,7 @@ def burn_subtitles(
                 if line.startswith("out_time_us=") or line.startswith("out_time_ms="):
                     try:
                         t = int(line.split("=")[1]) / 1_000_000
-                        pct = min(99, int(100 * t / duration))
+                        pct = min(99, 5 + int(95 * t / duration))
                         progress(pct, f"Burning subtitles… {pct}%")
                     except ValueError:
                         pass

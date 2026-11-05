@@ -1,5 +1,5 @@
 @echo off
-REM ===== LankaSubs: build the Windows .exe =====
+REM ===== LotusSubs: build the Windows .exe =====
 setlocal
 cd /d "%~dp0"
 
@@ -9,7 +9,7 @@ if errorlevel 1 goto nopython
 if not exist .venv python -m venv .venv
 call .venv\Scripts\activate.bat
 python -m pip install --upgrade pip
-pip install -r requirements.txt pyinstaller
+python -m pip install -r requirements.txt pyinstaller pillow
 if errorlevel 1 goto failed
 
 if exist bin\ffmpeg.exe goto build
@@ -18,13 +18,16 @@ powershell -NoProfile -ExecutionPolicy Bypass -Command "$ProgressPreference='Sil
 if not exist bin\ffmpeg.exe goto noffmpeg
 
 :build
-pyinstaller --noconfirm --clean --windowed --name LankaSubs --add-data "fonts;fonts" main.py
+REM Pillow lets PyInstaller turn assets\logo.png into the .exe icon
+set ICON=
+if exist assets\logo.png set ICON=--icon assets\logo.png
+pyinstaller --noconfirm --clean --windowed --name LotusSubs %ICON% --add-data "fonts;fonts" --add-data "assets;assets" main.py
 if errorlevel 1 goto failed
-xcopy /E /I /Y bin dist\LankaSubs\bin >nul
+xcopy /E /I /Y bin dist\LotusSubs\bin >nul
 echo.
 echo ==========================================================
-echo  DONE!  Your app is in:  dist\LankaSubs\LankaSubs.exe
-echo  Zip the whole dist\LankaSubs folder to share with your team.
+echo  DONE!  Your app is in:  dist\LotusSubs\LotusSubs.exe
+echo  Zip the whole dist\LotusSubs folder to share with your team.
 echo ==========================================================
 pause
 exit /b 0

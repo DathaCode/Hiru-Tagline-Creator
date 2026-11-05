@@ -1,0 +1,29 @@
+LotusSubs
+Copyright (c) 2026 Vidath Dulanjith, Lotus Technologies. All rights reserved.
+
+This software and its source code are the property of Vidath Dulanjith and
+Lotus Technologies. You may not copy, modify, distribute, sell or sublicense it
+without written permission from the copyright holder.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED. IN NO EVENT SHALL THE AUTHOR OR COPYRIGHT HOLDER BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY ARISING FROM THE USE OF THE SOFTWARE.
+
+-------------------------------------------------------------------------------
+Third-party components
+-------------------------------------------------------------------------------
+
+Noto Sans, Noto Sans Sinhala, Noto Sans Tamil (fonts\)
+  Copyright Google LLC. Licensed under the SIL Open Font License 1.1
+  https://openfontlicense.org
+
+FFmpeg (bin\ffmpeg.exe)
+  Copyright the FFmpeg developers. The bundled gyan.dev build is licensed
+  under the GNU GPL v3. Source code: https://ffmpeg.org/download.html
+
+Qt for Python (PySide6)
+  Copyright The Qt Company Ltd. Licensed under the GNU LGPL v3.
+  https://www.qt.io/qt-for-python
+
+Google Gen AI SDK (google-genai)
+  Copyright Google LLC. Licensed under the Apache License 2.0.

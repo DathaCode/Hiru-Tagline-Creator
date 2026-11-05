@@ -9,7 +9,7 @@ if errorlevel 1 goto nopython
 if not exist .venv python -m venv .venv
 call .venv\Scripts\activate.bat
 python -m pip install --upgrade pip
-python -m pip install -r requirements.txt pyinstaller pillow
+python -m pip install -r requirements.txt pyinstaller
 if errorlevel 1 goto failed
 
 if exist bin\ffmpeg.exe goto build
@@ -18,12 +18,13 @@ powershell -NoProfile -ExecutionPolicy Bypass -Command "$ProgressPreference='Sil
 if not exist bin\ffmpeg.exe goto noffmpeg
 
 :build
-REM Pillow lets PyInstaller turn assets\logo.png into the .exe icon
-set ICON=
-if exist assets\logo.png set ICON=--icon assets\logo.png
-pyinstaller --noconfirm --clean --windowed --name LotusSubs %ICON% --add-data "fonts;fonts" --add-data "assets;assets" main.py
+REM version.py writes version_info.txt: the .exe's version, author and copyright
+python version.py
+if errorlevel 1 goto failed
+pyinstaller --noconfirm --clean --windowed --name LotusSubs --icon assets\logo.ico --version-file version_info.txt --add-data "fonts;fonts" --add-data "assets;assets" main.py
 if errorlevel 1 goto failed
 xcopy /E /I /Y bin dist\LotusSubs\bin >nul
+copy /Y LICENSE.txt dist\LotusSubs\ >nul
 echo.
 echo ==========================================================
 echo  DONE!  Your app is in:  dist\LotusSubs\LotusSubs.exe

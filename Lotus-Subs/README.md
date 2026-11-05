@@ -65,9 +65,15 @@ so separate keys = separate limits).
 | `main.py` | Desktop window (PySide6): video, editor, live SUB TAG preview, export |
 | `subtag.py` | Draws a subtitle on the SUB TAG bed (used by the preview and the burn) |
 | `engine.py` | FFmpeg audio extraction, Gemini prompt, SRT, burn-in |
-| `assets/logo.png` | App logo: window, taskbar and .exe icon, header, empty preview |
+| `version.py` | Version, author and copyright – bump `APP_VERSION` here before a build |
+| `LICENSE.txt` | Copyright notice and third-party licences (copied next to the .exe) |
+| `assets/logo.png`, `logo.ico` | App logo: window, taskbar and .exe icon, header, empty preview, About |
+| `art/logo_source.jpg` | Original logo artwork (not bundled) |
 | `assets/subtag_bed.png` | The orange bed, cut from HiruTaglineCreator's `templates/SUB_TAG.png` |
 | `build.bat` | Builds `LotusSubs.exe` with PyInstaller |
 | `run_dev.bat` | Runs from source while you make changes |
 | `fonts/` | Bundled Sinhala/Tamil/Latin fonts |
 | `bin/` | `ffmpeg.exe` goes here (not in git – it's over GitHub's 100 MB limit) |
+
+---
+Copyright © 2026 Vidath Dulanjith, Lotus Technologies. All rights reserved.

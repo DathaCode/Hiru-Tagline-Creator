@@ -21,9 +21,10 @@ from PySide6.QtWidgets import (
 
 import engine
 import subtag
+import version
 from engine import Cue
 
-APP_NAME = "LotusSubs"
+APP_NAME = version.APP_NAME
 OLD_SETTINGS_NAME = "LankaSubs"  # the app's old name; its saved settings are copied over once
 LOGO_PATH = os.path.join(engine.resource_dir(), "assets", "logo.png")
 MODELS = ["gemini-3.5-flash", "gemini-2.5-flash", "gemini-2.5-pro"]
@@ -308,9 +309,11 @@ class MainWindow(QMainWindow):
         self.new_btn.clicked.connect(self.new_session)
         settings_btn = QPushButton("⚙  Settings"); settings_btn.setObjectName("light")
         settings_btn.clicked.connect(self.open_settings)
+        about_btn = QPushButton("ⓘ  About"); about_btn.setObjectName("light")
+        about_btn.clicked.connect(self.show_about)
         hl.addWidget(logo); hl.addSpacing(4)
         hl.addWidget(title); hl.addSpacing(12); hl.addWidget(sub); hl.addStretch()
-        hl.addWidget(self.new_btn); hl.addWidget(settings_btn)
+        hl.addWidget(self.new_btn); hl.addWidget(settings_btn); hl.addWidget(about_btn)
         root.addWidget(header)
 
         body = QWidget(); bl = QVBoxLayout(body); bl.setContentsMargins(14, 12, 14, 12); bl.setSpacing(10)
@@ -416,6 +419,20 @@ class MainWindow(QMainWindow):
 
     def open_settings(self):
         SettingsDialog(self.settings, self).exec()
+
+    def show_about(self):
+        box = QMessageBox(self)
+        box.setWindowTitle(f"About {APP_NAME}")
+        box.setIconPixmap(logo_pixmap(96))
+        box.setTextFormat(Qt.RichText)
+        box.setText(f"<h3>{APP_NAME} {version.APP_VERSION}</h3>"
+                    f"<p>AI subtitles on the Hiru SUB TAG bed<br>Sinhala • Tamil • English</p>"
+                    f"<p>Developed by <b>{version.AUTHOR}</b><br>{version.COMPANY}</p>"
+                    f"<p>{version.COPYRIGHT}</p>"
+                    "<p style='color:#6b7280'>Speech recognition and translation by Google Gemini.<br>"
+                    "Noto Sans fonts © Google, SIL Open Font License 1.1.<br>"
+                    "Video processing by FFmpeg (ffmpeg.org).</p>")
+        box.exec()
 
     def busy(self):
         return bool(self.worker and self.worker.isRunning())
@@ -756,6 +773,8 @@ def main():
         ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("LotusSubs.LotusSubs")
     app = QApplication(sys.argv)
     app.setApplicationName(APP_NAME)
+    app.setApplicationVersion(version.APP_VERSION)
+    app.setOrganizationName(version.COMPANY)
     if os.path.isfile(LOGO_PATH):
         app.setWindowIcon(QIcon(LOGO_PATH))
     app.setStyle("Fusion")

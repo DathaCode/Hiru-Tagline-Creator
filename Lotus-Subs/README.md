@@ -22,10 +22,16 @@ and mixed-language speech.
 
 1. Go to https://aistudio.google.com and sign in with a Google account.
 2. Click **Get API key → Create API key**, and copy it.
-3. In LotusSubs, click **⚙ Settings**, paste the key, and Save.
+3. In LotusSubs, click **🔒 Settings**, enter the **admin password**, paste the key, and Save.
 
-Each team member can use their own key (free-tier limits are per Google project,
-so separate keys = separate limits).
+**Settings are admin-only.** The Gemini key and model can only be viewed or changed
+after entering the admin password; three wrong tries lock Settings for a minute.
+The key is saved encrypted with Windows DPAPI, so it isn't readable in the registry,
+and it only decrypts for the Windows user who saved it, so the admin must enter it on
+each PC / user account. The password itself is not in the code, only a salted hash: to
+change it, run `python admin.py`, paste its three output lines into `admin.py`, and rebuild.
+
+Free-tier limits are per Google project, so separate keys on different PCs = separate limits.
 
 ## 3. Using the app
 
@@ -65,6 +71,7 @@ so separate keys = separate limits).
 | `main.py` | Desktop window (PySide6): video, editor, live SUB TAG preview, export |
 | `subtag.py` | Draws a subtitle on the SUB TAG bed (used by the preview and the burn) |
 | `engine.py` | FFmpeg audio extraction, Gemini prompt, SRT, burn-in |
+| `admin.py` | Admin password check for Settings, encrypted API-key storage |
 | `version.py` | Version, author and copyright – bump `APP_VERSION` here before a build |
 | `LICENSE.txt` | Copyright notice and third-party licences (copied next to the .exe) |
 | `assets/logo.png`, `logo.ico` | App logo: window, taskbar and .exe icon, header, empty preview, About |

@@ -128,6 +128,7 @@
   ('_threading_local',
    'C:\\Program Files\\Python314\\Lib\\_threading_local.py',
    'PYMODULE'),
+  ('admin', 'F:\\projects\\tagline-creator\\Lotus-Subs\\admin.py', 'PYMODULE'),
   ('annotated_types',
    'F:\\projects\\tagline-creator\\Lotus-Subs\\.venv\\Lib\\site-packages\\annotated_types\\__init__.py',
    'PYMODULE'),

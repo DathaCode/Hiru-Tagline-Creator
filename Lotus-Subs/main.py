@@ -4,6 +4,7 @@ from __future__ import annotations
 import os
 import sys
 import threading
+import time
 
 from PySide6.QtCore import QEvent, QSettings, QSizeF, Qt, QThread, QUrl, Signal
 from PySide6.QtGui import (
@@ -14,11 +15,12 @@ from PySide6.QtMultimediaWidgets import QGraphicsVideoItem
 from PySide6.QtWidgets import (
     QAbstractItemView, QApplication, QCheckBox, QComboBox, QDialog, QDialogButtonBox,
     QFileDialog, QFormLayout, QFrame, QGraphicsPixmapItem, QGraphicsScene, QGraphicsView,
-    QHBoxLayout, QHeaderView, QLabel, QLineEdit, QMainWindow, QMessageBox, QPlainTextEdit,
+    QHBoxLayout, QHeaderView, QInputDialog, QLabel, QLineEdit, QMainWindow, QMessageBox, QPlainTextEdit,
     QProgressBar, QPushButton, QSlider, QSplitter, QStyle, QStyledItemDelegate, QTableWidget,
     QTableWidgetItem, QVBoxLayout, QWidget,
 )
 
+import admin
 import engine
 import subtag
 import version
@@ -232,10 +234,14 @@ def logo_pixmap(size: int) -> QPixmap:
 
 def load_settings() -> QSettings:
     settings = QSettings(APP_NAME, APP_NAME)
+    old = QSettings(OLD_SETTINGS_NAME, OLD_SETTINGS_NAME)
     if not settings.allKeys():
-        old = QSettings(OLD_SETTINGS_NAME, OLD_SETTINGS_NAME)
         for key in old.allKeys():
             settings.setValue(key, old.value(key))
+    old.remove("api_key")  # don't leave a plain-text copy under the old name
+    key = settings.value("api_key", "")
+    if key and not key.startswith("dpapi:"):  # saved in plain text by an earlier version
+        settings.setValue("api_key", admin.protect(key))
     return settings
 
 
@@ -256,7 +262,7 @@ class SettingsDialog(QDialog):
         self.settings = settings
         form = QFormLayout(self)
 
-        self.key = QLineEdit(settings.value("api_key", os.environ.get("GEMINI_API_KEY", "")))
+        self.key = QLineEdit(admin.unprotect(settings.value("api_key", "")))
         self.key.setEchoMode(QLineEdit.Password)
         self.key.setPlaceholderText("Paste your key from aistudio.google.com")
         show = QCheckBox("Show")
@@ -278,7 +284,7 @@ class SettingsDialog(QDialog):
         self.resize(520, 160)
 
     def save(self):
-        self.settings.setValue("api_key", self.key.text().strip())
+        self.settings.setValue("api_key", admin.protect(self.key.text().strip()))
         self.settings.setValue("model", self.model.currentText().strip() or engine.DEFAULT_MODEL)
         self.accept()
 
@@ -293,6 +299,8 @@ class MainWindow(QMainWindow):
         self.video_path = ""
         self.worker = None
         self._bed_key = None
+        self._bad_passwords = 0
+        self._settings_locked_until = 0.0
         self.setAcceptDrops(True)
 
         central = QWidget(); self.setCentralWidget(central)
@@ -307,7 +315,8 @@ class MainWindow(QMainWindow):
         self.new_btn = QPushButton("＋  New session"); self.new_btn.setObjectName("light")
         self.new_btn.setToolTip("Clear the video and all subtitles (Ctrl+N)")
         self.new_btn.clicked.connect(self.new_session)
-        settings_btn = QPushButton("⚙  Settings"); settings_btn.setObjectName("light")
+        settings_btn = QPushButton("🔒  Settings"); settings_btn.setObjectName("light")
+        settings_btn.setToolTip("Gemini key and model (admin password required)")
         settings_btn.clicked.connect(self.open_settings)
         about_btn = QPushButton("ⓘ  About"); about_btn.setObjectName("light")
         about_btn.clicked.connect(self.show_about)
@@ -415,9 +424,25 @@ class MainWindow(QMainWindow):
 
     # -------------------------------------------------------------- helpers
     def api_key(self):
-        return self.settings.value("api_key", "") or os.environ.get("GEMINI_API_KEY", "")
+        return admin.unprotect(self.settings.value("api_key", "")) or os.environ.get("GEMINI_API_KEY", "")
 
     def open_settings(self):
+        """Settings hold the Gemini key and model, so only the admin may open them."""
+        if time.monotonic() < self._settings_locked_until:
+            secs = int(self._settings_locked_until - time.monotonic()) + 1
+            return QMessageBox.warning(self, APP_NAME, f"Too many wrong passwords. Try again in {secs} s.")
+        pw, ok = QInputDialog.getText(self, "Admin password",
+                                      "Settings are locked.\nEnter the admin password:", QLineEdit.Password)
+        if not ok:
+            return
+        if not admin.check_password(pw):
+            self._bad_passwords += 1
+            if self._bad_passwords >= 3:
+                self._bad_passwords = 0
+                self._settings_locked_until = time.monotonic() + 60
+                return QMessageBox.warning(self, APP_NAME, "Wrong password. Settings are locked for 1 minute.")
+            return QMessageBox.warning(self, APP_NAME, "Wrong password.")
+        self._bad_passwords = 0
         SettingsDialog(self.settings, self).exec()
 
     def show_about(self):
@@ -508,8 +533,9 @@ class MainWindow(QMainWindow):
         if not self.video_path:
             return QMessageBox.information(self, APP_NAME, "Choose a video first.")
         if not self.api_key():
-            QMessageBox.information(self, APP_NAME, "Add your Gemini API key first.")
-            return self.open_settings()
+            return QMessageBox.information(
+                self, APP_NAME, "No Gemini API key is set up on this PC.\n"
+                                "Ask your administrator to add it in ⚙ Settings.")
         if self.table.rowCount() and QMessageBox.question(
                 self, APP_NAME, "Replace the current subtitles?") != QMessageBox.Yes:
             return
